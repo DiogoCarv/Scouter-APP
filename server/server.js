@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 3001;
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 var bodyParser = require('body-parser');
@@ -31,7 +31,7 @@ const middlewareValidarJWT = (req, res, next) => {
 };
 const db = {
     host: '54.173.126.116',
-    port: 3302,
+    port: 3306,
     user: 'diogo',
     password: 'diogo',
     database: 'diogo'
