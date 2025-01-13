@@ -1,0 +1,22 @@
+CREATE TABLE usuarios (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY UNIQUE,
+    imagem_usuario VARCHAR(255),
+    nome_usuario VARCHAR(100),
+    sobrenome_usuario VARCHAR(100),
+    email_usuario VARCHAR(150) UNIQUE,
+    cpf_usuario VARCHAR(14) UNIQUE,
+    estado_usuario VARCHAR(50),
+    cidade_usuario VARCHAR(100),
+    senha_usuario VARCHAR(255)
+);
+
+CREATE TABLE publicacao (
+    id_publicacao INT AUTO_INCREMENT PRIMARY KEY UNIQUE,
+    imagem_publicacao VARCHAR(255),
+    titulo_publicacao VARCHAR(100),
+    descricao_publicacao VARCHAR(100),
+    estado_publicacao VARCHAR(100),
+    cidade_publicacao VARCHAR(100),
+    id_usuario INT,
+    constraint fk_id_usuario foreign key (id_usuario) references usuarios (id_usuario) ON DELETE SET NULL
+);
