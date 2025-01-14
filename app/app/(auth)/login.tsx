@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function Login() {
   const router = useRouter();
-  axios.defaults.baseURL = "http://localhost:3000/";
+  axios.defaults.baseURL = "http://3.209.65.64:3002/";
   const { setUser } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');

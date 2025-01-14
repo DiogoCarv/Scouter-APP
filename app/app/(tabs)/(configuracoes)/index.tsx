@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, ActivityIndicator, ScrollView } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from "../../../context/AuthProvider";
@@ -37,7 +37,7 @@ export default function UserSettings() {
           return;
         }
 
-        const response = await axios.get(`http://localhost:3000/usuarios/${user.id}`, {
+        const response = await axios.get(`http://3.209.65.64:3002/usuarios/${user.id}`, {
           headers: {
             Authorization: user.token
           }
@@ -83,54 +83,61 @@ export default function UserSettings() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
-        <Text style={titulo.header}>CONFIGURAÇÕES</Text>
-        <View style={styles.contentBox}>
+        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
+          <Text style={titulo.header}>CONFIGURAÇÕES</Text>
+          <View style={styles.contentBox}>
 
-          <View style={styles.campo}>
-            <Text style={texto.tituloCampo}>NOME</Text>
-            <View style={styles.divider} />
-            <Text style={texto.valorCampo}>{usuario.nome_usuario}</Text>
+            <Image
+              source={{ uri: usuario.imagem_usuario || 'https://via.placeholder.com/150' }}
+              style={imagens.image}
+            />
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>NOME</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{usuario.nome_usuario}</Text>
+            </View>
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>SOBRENOME</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{usuario.sobrenome_usuario}</Text>
+            </View>
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>CPF</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{formatarCPF(usuario.cpf_usuario)}</Text>
+            </View>
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>CIDADE</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{usuario.cidade_usuario}</Text>
+            </View>
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>ESTADO</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{usuario.estado_usuario}</Text>
+            </View>
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>EMAIL</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{usuario.email_usuario}</Text>
+            </View>
+
           </View>
-
-          <View style={styles.campo}>
-            <Text style={texto.tituloCampo}>SOBRENOME</Text>
-            <View style={styles.divider} />
-            <Text style={texto.valorCampo}>{usuario.sobrenome_usuario}</Text>
-          </View>
-
-          <View style={styles.campo}>
-            <Text style={texto.tituloCampo}>CPF</Text>
-            <View style={styles.divider} />
-            <Text style={texto.valorCampo}>{formatarCPF(usuario.cpf_usuario)}</Text>
-          </View>
-
-          <View style={styles.campo}>
-            <Text style={texto.tituloCampo}>CIDADE</Text>
-            <View style={styles.divider} />
-            <Text style={texto.valorCampo}>{usuario.cidade_usuario}</Text>
-          </View>
-
-          <View style={styles.campo}>
-            <Text style={texto.tituloCampo}>ESTADO</Text>
-            <View style={styles.divider} />
-            <Text style={texto.valorCampo}>{usuario.estado_usuario}</Text>
-          </View>
-
-          <View style={styles.campo}>
-            <Text style={texto.tituloCampo}>EMAIL</Text>
-            <View style={styles.divider} />
-            <Text style={texto.valorCampo}>{usuario.email_usuario}</Text>
-          </View>
-
-        </View>
-        <Pressable
-          style={botao.button}
-          onPress={async () => {
-            await logout();
-          }}
-        >
-          <Text style={texto.text}>LOGOUT</Text>
-        </Pressable>
+          <Pressable
+            style={botao.button}
+            onPress={async () => {
+              await logout();
+            }}
+          >
+            <Text style={texto.text}>LOGOUT</Text>
+          </Pressable>
+        </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
   );

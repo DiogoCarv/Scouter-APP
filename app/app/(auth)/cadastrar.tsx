@@ -1,5 +1,5 @@
 import { Link, useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, Image, View, Alert, TextInput } from 'react-native';
+import { Pressable, StyleSheet, Text, Image, View, Alert, TextInput, ScrollView } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
@@ -13,7 +13,7 @@ interface IndexProps {
 }
 
 export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
-  axios.defaults.baseURL = "http://localhost:3000/";
+  axios.defaults.baseURL = "http://3.209.65.64:3002/";
 
   const [senhaVisivel, setSenhaVisivel] = useState(false);
 
@@ -33,7 +33,7 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
 
   const Cadastrar = async () => {
     const cleanedCPF = cpf.replace(/\D/g, '');
-    
+
     const jsonBody = {
       email_usuario: email,
       nome_usuario: nome,
@@ -43,7 +43,7 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
       senha_usuario: senha,
       sobrenome_usuario: sobrenome,
     };
-  
+
     try {
       const response = await axios.post("usuarios", jsonBody);
       if (response.status === 201) {
@@ -136,114 +136,121 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
-        <Text style={styles.title}>CADASTRAR</Text>
+        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
+          <Text style={styles.title}>CADASTRAR</Text>
 
-        <View style={styles.contentBox}>
+          <View style={styles.contentBox}>
 
-          <TextInput
-            style={texto.input}
-            onChangeText={setEmail}
-            placeholder={'EMAIL'}
-          />
-
-          <TextInput
-            style={texto.input}
-            onChangeText={(value) => {
-              const sanitizedValue = value.replace(/[^a-zA-Zà-úÀ-Ú\s]/g, '').slice(0, 100);
-              setNome(sanitizedValue);
-            }}
-            value={nome}
-            placeholder={'NOME'}
-            maxLength={100}
-          />
-
-          <TextInput
-            style={texto.input}
-            onChangeText={(value) => {
-              const sanitizedValue = value.replace(/[^a-zA-Zà-úÀ-Ú\s]/g, '').slice(0, 100);
-              setSobrenome(sanitizedValue);
-            }}
-            value={sobrenome}
-            placeholder={'SOBRENOME'}
-            maxLength={100}
-          />
-
-          <TextInput
-            style={texto.input}
-            onChangeText={(value) => {
-              const numericValue = value.replace(/\D/g, '');
-
-              let formattedCPF = numericValue;
-              if (numericValue.length > 3) {
-                formattedCPF = numericValue.slice(0, 3) + '.' + numericValue.slice(3);
-              }
-              if (numericValue.length > 6) {
-                formattedCPF =
-                  formattedCPF.slice(0, 7) + '.' + numericValue.slice(6);
-              }
-              if (numericValue.length > 9) {
-                formattedCPF =
-                  formattedCPF.slice(0, 11) + '-' + numericValue.slice(9, 11);
-              }
-
-              setCPF(formattedCPF);
-            }}
-            value={cpf}
-            placeholder={'CPF'}
-            maxLength={14}
-            keyboardType="numeric"
-          />
-
-          <Picker
-            selectedValue={estado}
-            style={texto.input}
-            onValueChange={handleEstadoChange}
-          >
-            <Picker.Item label="Selecione o Estado" value="" />
-            {Object.keys(estadosECidades).map((uf) => (
-              <Picker.Item key={uf} label={uf} value={uf} />
-            ))}
-          </Picker>
-
-          <Picker
-            selectedValue={cidade}
-            style={texto.input}
-            onValueChange={setCidade}
-            enabled={cidadesDisponiveis.length > 0}
-          >
-            <Picker.Item label="Selecione a Cidade" value="" />
-            {cidadesDisponiveis.map((city) => (
-              <Picker.Item key={city} label={city} value={city} />
-            ))}
-          </Picker>
-
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.input}
-              secureTextEntry={!senhaVisivel}
-              onChangeText={setSenha}
-              value={senha}
-              placeholder="SENHA"
-              placeholderTextColor="#888"
+            <Image
+              source={{ uri: 'https://s2-oglobo.glbimg.com/-0dni84YWVLwPxS6-f6_Wqkmy-4=/0x0:850x572/888x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_da025474c0c44edd99332dddb09cabe8/internal_photos/bs/2022/d/v/kFDwF0T3q2wkwvGH0DjA/whatsapp-image-2022-10-03-at-15.34.37.jpeg' }}
+              style={styles.image}
             />
-            <Pressable onPress={alternarVisibilidadeSenha} style={styles.iconWrapper}>
-              <Ionicons
-                name={senhaVisivel ? 'eye' : 'eye-off'}
-                size={24}
-                color="#888"
+
+            <TextInput
+              style={texto.input}
+              onChangeText={setEmail}
+              placeholder={'EMAIL'}
+            />
+
+            <TextInput
+              style={texto.input}
+              onChangeText={(value) => {
+                const sanitizedValue = value.replace(/[^a-zA-Zà-úÀ-Ú\s]/g, '').slice(0, 100);
+                setNome(sanitizedValue);
+              }}
+              value={nome}
+              placeholder={'NOME'}
+              maxLength={100}
+            />
+
+            <TextInput
+              style={texto.input}
+              onChangeText={(value) => {
+                const sanitizedValue = value.replace(/[^a-zA-Zà-úÀ-Ú\s]/g, '').slice(0, 100);
+                setSobrenome(sanitizedValue);
+              }}
+              value={sobrenome}
+              placeholder={'SOBRENOME'}
+              maxLength={100}
+            />
+
+            <TextInput
+              style={texto.input}
+              onChangeText={(value) => {
+                const numericValue = value.replace(/\D/g, '');
+
+                let formattedCPF = numericValue;
+                if (numericValue.length > 3) {
+                  formattedCPF = numericValue.slice(0, 3) + '.' + numericValue.slice(3);
+                }
+                if (numericValue.length > 6) {
+                  formattedCPF =
+                    formattedCPF.slice(0, 7) + '.' + numericValue.slice(6);
+                }
+                if (numericValue.length > 9) {
+                  formattedCPF =
+                    formattedCPF.slice(0, 11) + '-' + numericValue.slice(9, 11);
+                }
+
+                setCPF(formattedCPF);
+              }}
+              value={cpf}
+              placeholder={'CPF'}
+              maxLength={14}
+              keyboardType="numeric"
+            />
+
+            <Picker
+              selectedValue={estado}
+              style={texto.input}
+              onValueChange={handleEstadoChange}
+            >
+              <Picker.Item label="Selecione o Estado" value="" />
+              {Object.keys(estadosECidades).map((uf) => (
+                <Picker.Item key={uf} label={uf} value={uf} />
+              ))}
+            </Picker>
+
+            <Picker
+              selectedValue={cidade}
+              style={texto.input}
+              onValueChange={setCidade}
+              enabled={cidadesDisponiveis.length > 0}
+            >
+              <Picker.Item label="Selecione a Cidade" value="" />
+              {cidadesDisponiveis.map((city) => (
+                <Picker.Item key={city} label={city} value={city} />
+              ))}
+            </Picker>
+
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                secureTextEntry={!senhaVisivel}
+                onChangeText={setSenha}
+                value={senha}
+                placeholder="SENHA"
+                placeholderTextColor="#888"
               />
-            </Pressable>
+              <Pressable onPress={alternarVisibilidadeSenha} style={styles.iconWrapper}>
+                <Ionicons
+                  name={senhaVisivel ? 'eye' : 'eye-off'}
+                  size={24}
+                  color="#888"
+                />
+              </Pressable>
+            </View>
+
           </View>
-          
-        </View>
 
-        <Pressable style={botao.button} onPress={Cadastrar}>
-          <Text style={styles.text}>CADASTRAR</Text>
-        </Pressable>
+          <Pressable style={botao.button} onPress={Cadastrar}>
+            <Text style={styles.text}>CADASTRAR</Text>
+          </Pressable>
 
-        <Pressable style={botao.button} onPress={irParaLogin}>
-          <Text style={styles.text}>JÁ TENHO CONTA</Text>
-        </Pressable>
+          <Pressable style={botao.button} onPress={irParaLogin}>
+            <Text style={styles.text}>JÁ TENHO CONTA</Text>
+          </Pressable>
+        </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
   );

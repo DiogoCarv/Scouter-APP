@@ -96,23 +96,27 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
       return;
     }
-
+  
     try {
-      const response = await axios.post('http://localhost:3000/publicacao', {
-        titulo_publicacao: titulo,
-        descricao_publicacao: descricao,
-        cidade_publicacao: cidade,
-        estado_publicacao: estado,
-        id_usuario: idUsuario,
-      }, {
-        headers: {
-          Authorization: user?.token
+      const response = await axios.post(
+        'http://3.209.65.64:3002/publicacao',
+        {
+          titulo_publicacao: titulo,
+          descricao_publicacao: descricao,
+          cidade_publicacao: cidade,
+          estado_publicacao: estado,
+          id_usuario: idUsuario,
+        },
+        {
+          headers: {
+            Authorization: user?.token,
+          },
         }
-      });
-
+      );
+  
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Publicação cadastrada com sucesso!');
-        router.push("/(tabs)/(feed)/");
+        router.replace("/(tabs)/(feed)");
       } else {
         Alert.alert('Erro', response.data.mensagem || 'Erro ao cadastrar a publicação.');
       }
@@ -120,7 +124,7 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
       console.error(error);
       Alert.alert('Erro', 'Não foi possível cadastrar a publicação. Tente novamente.');
     }
-  };
+  };  
 
   return (
     <View

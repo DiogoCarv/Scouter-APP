@@ -31,7 +31,7 @@ export default function SecondDetailsScreen({ onPress, title = 'VOLTAR' }: Index
     const fetchPublicacao = async () => {
       try {
         
-        const response = await axios.get(`http://localhost:3000/publicacao/${id}`, {
+        const response = await axios.get(`http://54.173.126.116:3002/publicacao/${id}`, {
           headers: {
             Authorization: user?.token
           }
@@ -69,6 +69,15 @@ export default function SecondDetailsScreen({ onPress, title = 'VOLTAR' }: Index
       <Text style={titulo.title}>DETALHES DA PUBLICAÇÃO</Text>
 
       <View style={styles.contentBox}>
+
+        <Image
+          source={{
+            uri: publicacao.imagem_publicacao
+              ? publicacao.imagem_publicacao
+              : 'https://via.placeholder.com/300',
+          }}
+          style={image.image}
+        />
 
         <View style={styles.campo}>
           <Text style={texto.tituloCampo}>Título</Text>

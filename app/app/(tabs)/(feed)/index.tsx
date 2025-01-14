@@ -1,6 +1,6 @@
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ScrollView } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from "../../../context/AuthProvider";
 import axios from 'axios';
@@ -54,8 +54,17 @@ export default function Index() {
 
   const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => {
 
+    const defaultImageUri = 'https://via.placeholder.com/50'; // Imagem padrão
+    const imageUri = item.imagem_publicacao ? item.imagem_publicacao : defaultImageUri;
+
     return (
       <TouchableOpacity onPress={onPress} style={[styles.feedItem, { backgroundColor }]}>
+
+        <Image
+          source={{ uri: imageUri }}
+          style={imagem.feedImage}
+        />
+
         <View style={styles.textContainer}>
           <Link
             href={`/details/${item.id_publicacao}`}
@@ -88,18 +97,20 @@ export default function Index() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
-        <Text style={titulo.header}>FEED</Text>
+        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
+          <Text style={titulo.header}>FEED</Text>
 
-        {data.length > 0 ? (
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id_publicacao}
-            extraData={selectedId}
-          />
-        ) : (
-          <Text style={texto.noPosts}>Nenhuma publicação encontrada de outros usuários.</Text>
-        )}
+          {data.length > 0 ? (
+            <FlatList
+              data={data}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id_publicacao}
+              extraData={selectedId}
+            />
+          ) : (
+            <Text style={texto.noPosts}>Nenhuma publicação encontrada de outros usuários.</Text>
+          )}
+        </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
   );

@@ -34,7 +34,7 @@ function useProtectedRoute(user: User | null) {
       if (user.name === "cadastrar") {
         router.replace("/cadastrar");
       } else {
-        router.replace("/(tabs)");
+        router.replace("/(tabs)/(feed)");
       }
     }
   }, [user, segments]);

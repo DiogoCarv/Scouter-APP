@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@react-navigation/drawer": "^7.1.1",
+    "@react-navigation/native": "^7.0.14",
+    "expo": "^52.0.25"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/react": "~18.3.12"
+  }
+}

@@ -1,6 +1,6 @@
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ScrollView } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from "../../../context/AuthProvider";
 import axios from 'axios';
@@ -53,8 +53,12 @@ export default function Index() {
 
   const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => {
 
+    const defaultImageUri = 'https://via.placeholder.com/50'; // Imagem padrão
+    const imageUri = item.imagem_publicacao ? item.imagem_publicacao : defaultImageUri;
+
     return (
       <TouchableOpacity onPress={onPress} style={[styles.feedItem, { backgroundColor }]}>
+        <Image source={{ uri: imageUri }} style={imagem.notificationImage} />
         <View style={styles.textContainer}>
           <Link
             href={`/details/${item.id_publicacao}`}
@@ -87,18 +91,20 @@ export default function Index() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
-        <Text style={titulo.header}>MINHAS PUBLICAÇÕES</Text>
+        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
+          <Text style={titulo.header}>MINHAS PUBLICAÇÕES</Text>
 
-        {data.length > 0 ? (
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id_publicacao}
-            extraData={selectedId}
-          />
-        ) : (
-          <Text style={texto.noPosts}>Você ainda não tem publicações.</Text>
-        )}
+          {data.length > 0 ? (
+            <FlatList
+              data={data}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id_publicacao}
+              extraData={selectedId}
+            />
+          ) : (
+            <Text style={texto.noPosts}>Você ainda não tem publicações.</Text>
+          )}
+        </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -134,14 +140,10 @@ const texto = StyleSheet.create({
 });
 
 const imagem = StyleSheet.create({
-  feedImage: {
+  notificationImage: {
     width: 50,
     height: 50,
     borderRadius: 8,
-    marginTop: 1,
-    marginBottom: 1,
-    marginLeft: 1,
-    marginRight: 2,
   },
 });
 
