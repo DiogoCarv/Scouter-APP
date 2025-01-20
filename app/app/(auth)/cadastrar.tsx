@@ -136,120 +136,92 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
-        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
-          <Text style={styles.title}>CADASTRAR</Text>
 
-          <View style={styles.contentBox}>
+        <ScrollView
+          style={safe.scroll}
+          contentContainerStyle={safe.scrollContent}
+        >
 
-            <Image
-              source={{ uri: 'https://s2-oglobo.glbimg.com/-0dni84YWVLwPxS6-f6_Wqkmy-4=/0x0:850x572/888x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_da025474c0c44edd99332dddb09cabe8/internal_photos/bs/2022/d/v/kFDwF0T3q2wkwvGH0DjA/whatsapp-image-2022-10-03-at-15.34.37.jpeg' }}
-              style={styles.image}
-            />
+          <View style={styles.wrapper}>
 
-            <TextInput
-              style={texto.input}
-              onChangeText={setEmail}
-              placeholder={'EMAIL'}
-            />
-
-            <TextInput
-              style={texto.input}
-              onChangeText={(value) => {
-                const sanitizedValue = value.replace(/[^a-zA-Zà-úÀ-Ú\s]/g, '').slice(0, 100);
-                setNome(sanitizedValue);
-              }}
-              value={nome}
-              placeholder={'NOME'}
-              maxLength={100}
-            />
-
-            <TextInput
-              style={texto.input}
-              onChangeText={(value) => {
-                const sanitizedValue = value.replace(/[^a-zA-Zà-úÀ-Ú\s]/g, '').slice(0, 100);
-                setSobrenome(sanitizedValue);
-              }}
-              value={sobrenome}
-              placeholder={'SOBRENOME'}
-              maxLength={100}
-            />
-
-            <TextInput
-              style={texto.input}
-              onChangeText={(value) => {
-                const numericValue = value.replace(/\D/g, '');
-
-                let formattedCPF = numericValue;
-                if (numericValue.length > 3) {
-                  formattedCPF = numericValue.slice(0, 3) + '.' + numericValue.slice(3);
-                }
-                if (numericValue.length > 6) {
-                  formattedCPF =
-                    formattedCPF.slice(0, 7) + '.' + numericValue.slice(6);
-                }
-                if (numericValue.length > 9) {
-                  formattedCPF =
-                    formattedCPF.slice(0, 11) + '-' + numericValue.slice(9, 11);
-                }
-
-                setCPF(formattedCPF);
-              }}
-              value={cpf}
-              placeholder={'CPF'}
-              maxLength={14}
-              keyboardType="numeric"
-            />
-
-            <Picker
-              selectedValue={estado}
-              style={texto.input}
-              onValueChange={handleEstadoChange}
-            >
-              <Picker.Item label="Selecione o Estado" value="" />
-              {Object.keys(estadosECidades).map((uf) => (
-                <Picker.Item key={uf} label={uf} value={uf} />
-              ))}
-            </Picker>
-
-            <Picker
-              selectedValue={cidade}
-              style={texto.input}
-              onValueChange={setCidade}
-              enabled={cidadesDisponiveis.length > 0}
-            >
-              <Picker.Item label="Selecione a Cidade" value="" />
-              {cidadesDisponiveis.map((city) => (
-                <Picker.Item key={city} label={city} value={city} />
-              ))}
-            </Picker>
-
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                secureTextEntry={!senhaVisivel}
-                onChangeText={setSenha}
-                value={senha}
-                placeholder="SENHA"
-                placeholderTextColor="#888"
+            <Text style={styles.title}>CADASTRAR</Text>
+            
+            <View style={styles.contentBox}>
+              <Image
+                source={{
+                  uri: 'https://s2-oglobo.glbimg.com/-0dni84YWVLwPxS6-f6_Wqkmy-4=/0x0:850x572/888x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_da025474c0c44edd99332dddb09cabe8/internal_photos/bs/2022/d/v/kFDwF0T3q2wkwvGH0DjA/whatsapp-image-2022-10-03-at-15.34.37.jpeg',
+                }}
+                style={styles.image}
               />
-              <Pressable onPress={alternarVisibilidadeSenha} style={styles.iconWrapper}>
-                <Ionicons
-                  name={senhaVisivel ? 'eye' : 'eye-off'}
-                  size={24}
-                  color="#888"
+
+              <TextInput
+                style={texto.input}
+                onChangeText={setEmail}
+                placeholder={'EMAIL'}
+              />
+              <TextInput
+                style={texto.input}
+                onChangeText={(value) => setNome(value)}
+                value={nome}
+                placeholder={'NOME'}
+              />
+              <TextInput
+                style={texto.input}
+                onChangeText={(value) => setSobrenome(value)}
+                value={sobrenome}
+                placeholder={'SOBRENOME'}
+              />
+              <TextInput
+                style={texto.input}
+                onChangeText={(value) => setCPF(value)}
+                value={cpf}
+                placeholder={'CPF'}
+              />
+              <Picker
+                selectedValue={estado}
+                style={texto.input}
+                onValueChange={handleEstadoChange}
+              >
+                <Picker.Item label="Selecione o Estado" value="" />
+                {Object.keys(estadosECidades).map((uf) => (
+                  <Picker.Item key={uf} label={uf} value={uf} />
+                ))}
+              </Picker>
+              <Picker
+                selectedValue={cidade}
+                style={texto.input}
+                onValueChange={setCidade}
+              >
+                <Picker.Item label="Selecione a Cidade" value="" />
+                {cidadesDisponiveis.map((city) => (
+                  <Picker.Item key={city} label={city} value={city} />
+                ))}
+              </Picker>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  secureTextEntry={!senhaVisivel}
+                  onChangeText={setSenha}
+                  value={senha}
+                  placeholder="SENHA"
                 />
-              </Pressable>
+                <Pressable onPress={alternarVisibilidadeSenha} style={styles.iconWrapper}>
+                  <Ionicons
+                    name={senhaVisivel ? 'eye' : 'eye-off'}
+                    size={24}
+                    color="#888"
+                  />
+                </Pressable>
+              </View>
             </View>
 
+            <Pressable style={botao.button} onPress={Cadastrar}>
+              <Text style={styles.text}>CADASTRAR</Text>
+            </Pressable>
+            <Pressable style={botao.button} onPress={irParaLogin}>
+              <Text style={styles.text}>JÁ TENHO CONTA</Text>
+            </Pressable>
           </View>
-
-          <Pressable style={botao.button} onPress={Cadastrar}>
-            <Text style={styles.text}>CADASTRAR</Text>
-          </Pressable>
-
-          <Pressable style={botao.button} onPress={irParaLogin}>
-            <Text style={styles.text}>JÁ TENHO CONTA</Text>
-          </Pressable>
         </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -258,18 +230,29 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
 
 const texto = StyleSheet.create({
   input: {
-    height: 40,
+    height: 50,
     margin: 12,
     borderWidth: 1,
     padding: 10,
     width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 5,
   },
 });
 
 const safe = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
   },
 });
 
@@ -284,6 +267,7 @@ const botao = StyleSheet.create({
     backgroundColor: '#191970',
     marginBottom: 10,
     marginTop: 10,
+    width: 300,
   },
 });
 
@@ -301,7 +285,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D3D3D3',
     padding: 20,
     borderRadius: 10,
-    width: '90%',
+    width: 300,
     alignItems: 'center',
     marginTop: 100,
     flex: 1,
@@ -339,5 +323,9 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     marginLeft: 8,
+  },
+  wrapper: {
+    alignItems: 'center',
+    paddingVertical: 20,
   },
 });

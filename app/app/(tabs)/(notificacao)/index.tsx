@@ -91,20 +91,18 @@ export default function Index() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
-        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
-          <Text style={titulo.header}>MINHAS PUBLICAÇÕES</Text>
+        <Text style={titulo.header}>MINHAS PUBLICAÇÕES</Text>
 
-          {data.length > 0 ? (
-            <FlatList
-              data={data}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id_publicacao}
-              extraData={selectedId}
-            />
-          ) : (
-            <Text style={texto.noPosts}>Você ainda não tem publicações.</Text>
-          )}
-        </ScrollView>
+        {data.length > 0 ? (
+          <FlatList
+            data={data}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id_publicacao}
+            extraData={selectedId}
+          />
+        ) : (
+          <Text style={texto.noPosts}>Você ainda não tem publicações.</Text>
+        )}
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -130,7 +128,10 @@ const texto = StyleSheet.create({
     color: '#F8F8FF',
     marginBottom: 1,
     marginTop: 1,
-  },
+    flexWrap: 'nowrap', // Não permite quebra de linha
+    overflow: 'hidden', // Oculta o texto excedente
+    textOverflow: 'ellipsis', // Adiciona reticências
+  },  
   noPosts: {
     fontSize: 16,
     color: '#696969',
@@ -141,8 +142,8 @@ const texto = StyleSheet.create({
 
 const imagem = StyleSheet.create({
   notificationImage: {
-    width: 50,
-    height: 50,
+    width: '50%',
+    height: '50%',
     borderRadius: 8,
   },
 });
@@ -166,10 +167,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     backgroundColor: '#000080',
     borderRadius: 8,
-    width: '90%',
-  },
+    alignSelf: 'stretch',
+    height: '100%', // Altura fixa para todos os retângulos
+    width: '100%',
+  },  
   textContainer: {
     marginLeft: 10,
-    flex: 1,
-  },
+    flex: 1, // Permite que o texto ocupe o espaço restante
+    justifyContent: 'center', // Centraliza verticalmente o conteúdo
+  },  
 });

@@ -70,6 +70,7 @@ export default function Login() {
         />
 
         <View style={styles.inputWrapper}>
+
           <TextInput
             style={styles.input}
             secureTextEntry={!senhaVisivel}
@@ -78,6 +79,7 @@ export default function Login() {
             placeholder="SENHA"
             placeholderTextColor="#888"
           />
+          
           <Pressable onPress={alternarVisibilidadeSenha} style={styles.iconWrapper}>
             <Ionicons
               name={senhaVisivel ? 'eye' : 'eye-off'}
@@ -85,6 +87,7 @@ export default function Login() {
               color="#888"
             />
           </Pressable>
+
         </View>
 
         <Pressable style={botao.button} onPress={handleLogin}>
@@ -127,6 +130,7 @@ const botao = StyleSheet.create({
     elevation: 3,
     backgroundColor: '#191970',
     marginTop: 20,
+    width: 300,
   },
 });
 

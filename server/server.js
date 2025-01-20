@@ -15,20 +15,25 @@ app.use(cors());
 app.use(express.json());
 app.get('/', (req, res) => res.json({ message: 'Funcionando!' }));
 
-const jwt = require("jsonwebtoken");
-const privateKey = "xxxyyyzzz123";
+const privateKey = process.env.JWT_SECRET || "defaultSecret";
 
-const middlewareValidarJWT = (req, res, next) => {
-    const jwtToken = req.headers["authorization"];
-    jwt.verify(jwtToken, privateKey, (err, userInfo) => {
-        if (err) {
-            res.status(403).end();
-            return;
-        }
-        req.userInfo = userInfo;
-        next();
-    });
-};
+const compression = require('compression');
+app.use(compression());
+
+const helmet = require('helmet');
+app.use(helmet());
+
+const jwt = require("jsonwebtoken");
+//const privateKey = "xxxyyyzzz123";
+
+jwt.verify(jwtToken, privateKey, (err, userInfo) => {
+    if (err) {
+        return res.status(403).json({ mensagem: "Token inválido ou expirado." });
+    }
+    req.userInfo = userInfo;
+    next();
+});
+
 const db = {
     host: '3.209.65.64',
     port: 3306,

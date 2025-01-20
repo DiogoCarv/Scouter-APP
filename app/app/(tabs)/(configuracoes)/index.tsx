@@ -82,11 +82,14 @@ export default function UserSettings() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={safe.container}>
-        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
+    <SafeAreaView style={safe.container}>
+      <ScrollView
+        style={safe.scroll}
+        contentContainerStyle={safe.scrollContent}
+      >
+        <View style={styles.wrapper}>
           <Text style={titulo.header}>CONFIGURAÇÕES</Text>
           <View style={styles.contentBox}>
-
             <Image
               source={{ uri: usuario.imagem_usuario || 'https://via.placeholder.com/150' }}
               style={imagens.image}
@@ -127,27 +130,35 @@ export default function UserSettings() {
               <View style={styles.divider} />
               <Text style={texto.valorCampo}>{usuario.email_usuario}</Text>
             </View>
-
           </View>
-          <Pressable
-            style={botao.button}
-            onPress={async () => {
-              await logout();
-            }}
-          >
-            <Text style={texto.text}>LOGOUT</Text>
-          </Pressable>
-        </ScrollView>
-      </SafeAreaView>
-    </SafeAreaProvider>
+        </View>
+        <Pressable
+          style={botao.button}
+          onPress={async () => {
+            await logout();
+          }}
+        >
+          <Text style={texto.text}>LOGOUT</Text>
+        </Pressable>
+      </ScrollView>
+    </SafeAreaView>
+  </SafeAreaProvider>
   );
 }
-
 const safe = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
   },
 });
 
@@ -176,6 +187,7 @@ const botao = StyleSheet.create({
     elevation: 3,
     backgroundColor: '#191970',
     marginTop: 10,
+    width: 300,
   },
 });
 
@@ -216,7 +228,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     alignItems: 'center',
-    width: '90%',
+    width: 300,
   },
   campo: {
     backgroundColor: '#929cad',
@@ -230,5 +242,9 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'black',
     marginVertical: 8,
+  },
+  wrapper: {
+    alignItems: 'center',
+    paddingVertical: 20,
   },
 });

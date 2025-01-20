@@ -97,20 +97,18 @@ export default function Index() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
-        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingVertical: 20 }}>
-          <Text style={titulo.header}>FEED</Text>
+        <Text style={titulo.header}>FEED</Text>
 
-          {data.length > 0 ? (
-            <FlatList
-              data={data}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.id_publicacao}
-              extraData={selectedId}
-            />
-          ) : (
-            <Text style={texto.noPosts}>Nenhuma publicação encontrada de outros usuários.</Text>
-          )}
-        </ScrollView>
+        {data.length > 0 ? (
+          <FlatList
+            data={data}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id_publicacao}
+            extraData={selectedId}
+          />
+        ) : (
+          <Text style={texto.noPosts}>Nenhuma publicação encontrada de outros usuários.</Text>
+        )}
       </SafeAreaView>
     </SafeAreaProvider>
   );
