@@ -7,7 +7,7 @@ import { useAuth } from "../../context/AuthProvider";
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { CameraView, CameraType, useCameraPermissions, Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 
 interface IndexProps {
@@ -17,6 +17,23 @@ interface IndexProps {
 
 export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
   axios.defaults.baseURL = "http://3.209.65.64:3002/";
+
+  const [image, setImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   const [senhaVisivel, setSenhaVisivel] = useState(false);
 
@@ -37,18 +54,30 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
   const Cadastrar = async () => {
     const cleanedCPF = cpf.replace(/\D/g, '');
 
-    const jsonBody = {
-      email_usuario: email,
-      nome_usuario: nome,
-      cpf_usuario: cleanedCPF,
-      cidade_usuario: cidade,
-      estado_usuario: estado,
-      senha_usuario: senha,
-      sobrenome_usuario: sobrenome,
-    };
+    const formData = new FormData();
+    formData.append('email_usuario', email);
+    formData.append('nome_usuario', nome);
+    formData.append('cpf_usuario', cleanedCPF);
+    formData.append('cidade_usuario', cidade);
+    formData.append('estado_usuario', estado);
+    formData.append('senha_usuario', senha);
+    formData.append('sobrenome_usuario', sobrenome);
+
+    if (image) {
+      const response = await fetch(image);
+      const blob = await response.blob();
+      const filename = image.split('/').pop();
+
+      formData.append('foto_usuario', blob, filename);
+    }
 
     try {
-      const response = await axios.post("usuarios", jsonBody);
+      const response = await axios.post("usuarios", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       if (response.status === 201) {
         Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
         router.push("/(auth)/login");
@@ -136,6 +165,21 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
     router.push("/(auth)/login");
   };
 
+  const formatCPF = (value: string): string => {
+    const numericValue = value.replace(/\D/g, ''); // Remove todos os caracteres que não sejam números
+    const limitedValue = numericValue.slice(0, 11); // Limita o CPF a 11 dígitos
+
+    if (limitedValue.length <= 3) {
+      return limitedValue; // Retorna os primeiros dígitos sem pontuação
+    } else if (limitedValue.length <= 6) {
+      return `${limitedValue.slice(0, 3)}.${limitedValue.slice(3)}`; // Adiciona o primeiro ponto
+    } else if (limitedValue.length <= 9) {
+      return `${limitedValue.slice(0, 3)}.${limitedValue.slice(3, 6)}.${limitedValue.slice(6)}`; // Adiciona o segundo ponto
+    } else {
+      return `${limitedValue.slice(0, 3)}.${limitedValue.slice(3, 6)}.${limitedValue.slice(6, 9)}-${limitedValue.slice(9)}`; // Formata completo
+    }
+  };
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
@@ -151,10 +195,10 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
 
             <View style={styles.contentBox}>
 
-              <Pressable>
+              <Pressable onPress={pickImage}>
                 <Image
                   source={{
-                    uri: 'https://cokimoveis.com.br/img/sem_foto.png',
+                    uri: image || 'https://cokimoveis.com.br/img/sem_foto.png',
                   }}
                   style={styles.image}
                 />
@@ -168,23 +212,33 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
 
               <TextInput
                 style={texto.input}
-                onChangeText={(value) => setNome(value)}
+                onChangeText={(value) => {
+                  const filteredValue = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, ''); // Permite apenas letras e espaços
+                  setNome(filteredValue);
+                }}
                 value={nome}
                 placeholder={'NOME'}
               />
 
               <TextInput
                 style={texto.input}
-                onChangeText={(value) => setSobrenome(value)}
+                onChangeText={(value) => {
+                  const filteredValue = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, ''); // Permite apenas letras e espaços
+                  setSobrenome(filteredValue);
+                }}
                 value={sobrenome}
                 placeholder={'SOBRENOME'}
               />
 
               <TextInput
                 style={texto.input}
-                onChangeText={(value) => setCPF(value)}
+                onChangeText={(value) => {
+                  const formattedCPF = formatCPF(value);
+                  setCPF(formattedCPF);
+                }}
                 value={cpf}
                 placeholder={'CPF'}
+                keyboardType="numeric"
               />
 
               <Picker

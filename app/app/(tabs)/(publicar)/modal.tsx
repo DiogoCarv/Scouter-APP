@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from "../../../context/AuthProvider";
 import { Link, router, useRouter } from 'expo-router';
+
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -13,7 +14,26 @@ interface IndexProps {
 }
 
 export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
+  axios.defaults.baseURL = "http://3.209.65.64:3002/";
+
   const { user, logout } = useAuth();
+
+  const [image, setImage] = useState<string | null>(null);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -151,10 +171,10 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
       >
         <Text style={styles.title}>PUBLICAR</Text>
 
-        <Pressable>
+        <Pressable onPress={pickImage}>
           <Image
             source={{
-              uri: 'https://cokimoveis.com.br/img/sem_foto.png',
+              uri: image || 'https://cokimoveis.com.br/img/sem_foto.png',
             }}
             style={styles.image}
           />
