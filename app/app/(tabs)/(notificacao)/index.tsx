@@ -20,7 +20,6 @@ export default function Index() {
           },
         });
 
-        // Filtrar publicações do usuário logado com o tipo explícito
         const userPosts = response.data.filter((item: ItemData) => item.id_usuario === userId);
 
         setData(userPosts);
@@ -52,10 +51,9 @@ export default function Index() {
   };
 
   const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => {
-
-    const defaultImageUri = 'https://via.placeholder.com/50'; // Imagem padrão
-    const imageUri = item.imagem_publicacao ? item.imagem_publicacao : defaultImageUri;
-
+    const defaultImageUri = 'https://cokimoveis.com.br/img/sem_foto.png';
+    const imageUri = item.imagem_publicacao || defaultImageUri;
+  
     return (
       <TouchableOpacity onPress={onPress} style={[styles.feedItem, { backgroundColor }]}>
         <Image source={{ uri: imageUri }} style={imagem.notificationImage} />
@@ -70,7 +68,7 @@ export default function Index() {
         </View>
       </TouchableOpacity>
     );
-  };
+  };  
 
   const [selectedId, setSelectedId] = useState<string>();
 
@@ -93,16 +91,20 @@ export default function Index() {
       <SafeAreaView style={safe.container}>
         <Text style={titulo.header}>MINHAS PUBLICAÇÕES</Text>
 
-        {data.length > 0 ? (
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id_publicacao}
-            extraData={selectedId}
-          />
-        ) : (
-          <Text style={texto.noPosts}>Você ainda não tem publicações.</Text>
-        )}
+        <View style={safe.quadrado}>
+
+          {data.length > 0 ? (
+            <FlatList
+              data={data}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id_publicacao}
+              extraData={selectedId}
+            />
+          ) : (
+            <Text style={texto.noPosts}>Você ainda não tem publicações.</Text>
+          )}
+
+        </View>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -113,6 +115,10 @@ const safe = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
+  quadrado: {
+    width: '95%',
+    overflow: 'hidden',
+  }
 });
 
 const texto = StyleSheet.create({
@@ -121,6 +127,9 @@ const texto = StyleSheet.create({
     color: '#F5F5F5',
     marginTop: 1,
     marginBottom: 1,
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   feedTitle: {
     fontSize: 18,
@@ -128,23 +137,15 @@ const texto = StyleSheet.create({
     color: '#F8F8FF',
     marginBottom: 1,
     marginTop: 1,
-    flexWrap: 'nowrap', // Não permite quebra de linha
-    overflow: 'hidden', // Oculta o texto excedente
-    textOverflow: 'ellipsis', // Adiciona reticências
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },  
   noPosts: {
     fontSize: 16,
     color: '#696969',
     textAlign: 'center',
     marginTop: 20,
-  },
-});
-
-const imagem = StyleSheet.create({
-  notificationImage: {
-    width: '50%',
-    height: '50%',
-    borderRadius: 8,
   },
 });
 
@@ -163,17 +164,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    marginVertical: 4,
+    marginVertical: 8,
     marginHorizontal: 8,
     backgroundColor: '#000080',
     borderRadius: 8,
-    alignSelf: 'stretch',
-    height: '100%', // Altura fixa para todos os retângulos
-    width: '100%',
-  },  
+    height: 120,
+    overflow: 'hidden',
+    width: '95%',
+  },
   textContainer: {
     marginLeft: 10,
-    flex: 1, // Permite que o texto ocupe o espaço restante
-    justifyContent: 'center', // Centraliza verticalmente o conteúdo
-  },  
+    flex: 1,
+    justifyContent: 'center',
+  },
+});
+
+const imagem = StyleSheet.create({
+  notificationImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    resizeMode: 'cover',
+    overflow: 'hidden',
+  },
 });
