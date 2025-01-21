@@ -38,7 +38,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#1C1C1C'
+    color: '#1C1C1C',
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 });
 
@@ -61,6 +64,9 @@ const texto = StyleSheet.create({
     color: 'black',
     fontSize: 12,
     marginBottom: -8,
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   valorCampo: {
     fontSize: 16,
@@ -74,5 +80,8 @@ const texto = StyleSheet.create({
     letterSpacing: 0.25,
     color: 'white',
     fontWeight: 'bold',
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 });

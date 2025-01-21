@@ -52,40 +52,25 @@ export default function Index() {
     sobrenome_usuario: string;
   };
 
-  const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => {
+  const Item = ({ item }: { item: ItemData }) => {
     const defaultImageUri = 'https://cokimoveis.com.br/img/sem_foto.png';
     const imageUri = item.imagem_publicacao || defaultImageUri;
   
     return (
-      <TouchableOpacity onPress={onPress} style={[styles.feedItem, { backgroundColor }]}>
+      <TouchableOpacity style={styles.feedItem}>
         <Image source={{ uri: imageUri }} style={imagem.notificationImage} />
         <View style={styles.textContainer}>
-          <Link
-            href={`/details/${item.id_publicacao}`}
-            style={{ ...texto.feedTitle, color: textColor }}
-          >
+          <Link href={`/details/${item.id_publicacao}`} style={texto.feedTitle}>
             {item.titulo_publicacao}
           </Link>
           <Text style={texto.feedDescription}>{item.descricao_publicacao}</Text>
         </View>
       </TouchableOpacity>
     );
-  };  
-
-  const [selectedId, setSelectedId] = useState<string>();
+  };
 
   const renderItem = ({ item }: { item: ItemData }) => {
-    const backgroundColor = item.id_publicacao === selectedId ? '#0000FF' : '#000080';
-    const color = item.id_publicacao === selectedId ? 'white' : '#F8F8FF';
-
-    return (
-      <Item
-        item={item}
-        onPress={() => setSelectedId(item.id_publicacao)}
-        backgroundColor={backgroundColor}
-        textColor={color}
-      />
-    );
+    return <Item item={item} />;
   };
 
   return (
@@ -100,7 +85,6 @@ export default function Index() {
               data={data}
               renderItem={renderItem}
               keyExtractor={(item) => item.id_publicacao}
-              extraData={selectedId}
             />
           ) : (
             <Text style={texto.noPosts}>Você ainda não tem publicações.</Text>

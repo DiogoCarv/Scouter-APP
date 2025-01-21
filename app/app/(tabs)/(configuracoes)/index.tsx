@@ -167,6 +167,9 @@ const titulo = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   title: {
     fontSize: 20,
@@ -174,6 +177,9 @@ const titulo = StyleSheet.create({
     fontWeight: 'bold',
     letterSpacing: 0.25,
     marginBottom: 5,
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 });
 
@@ -206,6 +212,9 @@ const texto = StyleSheet.create({
     color: 'black',
     fontSize: 12,
     marginBottom: -8,
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   valorCampo: {
     fontSize: 16,
@@ -219,6 +228,9 @@ const texto = StyleSheet.create({
     letterSpacing: 0.25,
     color: 'white',
     fontWeight: 'bold',
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 });
 

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image, ActivityIndicator, ScrollView } from 'react-native';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useState } from 'react';
@@ -29,12 +29,12 @@ export default function DetailsScreen() {
   useEffect(() => {
     const fetchPublicacao = async () => {
       try {
-        const response = await axios.get(`http://54.173.126.116:3002/publicacao/${id}`, {
+        const response = await axios.get(`http://3.209.65.64:3002/publicacao/${id}`, {
           headers: {
             Authorization: user?.token
           }
         });
-        
+
         setPublicacao(response.data);
       } catch (err) {
         console.error(err);
@@ -64,47 +64,61 @@ export default function DetailsScreen() {
 
   return (
     <SafeAreaView style={safe.container}>
-      <Text style={titulo.title}>DETALHES DA PUBLICAÇÃO</Text>
 
-      <View style={styles.contentBox}>
+      <ScrollView
+        style={safe.scroll}
+        contentContainerStyle={safe.scrollContent}
+      >
 
-        <Image
-          source={{
-            uri: publicacao.imagem_publicacao
-              ? publicacao.imagem_publicacao
-              : 'https://via.placeholder.com/300',
-          }}
-          style={image.image}
-        />
+        <View style={styles.wrapper}>
 
-        <View style={styles.campo}>
-          <Text style={texto.tituloCampo}>Título</Text>
-          <View style={styles.divider} />
-          <Text style={texto.valorCampo}>{publicacao.titulo_publicacao}</Text>
+          <Text style={titulo.title}>DETALHES DA PUBLICAÇÃO</Text>
+
+          <View style={styles.contentBox}>
+
+            <Image
+              source={{
+                uri: publicacao.imagem_publicacao
+                  ? publicacao.imagem_publicacao
+                  : 'https://cokimoveis.com.br/img/sem_foto.png',
+              }}
+              style={image.image}
+            />
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>Título</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{publicacao.titulo_publicacao}</Text>
+            </View>
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>Cidade</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{publicacao.cidade_publicacao}</Text>
+            </View>
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>Estado</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{publicacao.estado_publicacao}</Text>
+            </View>
+
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>Descrição</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{publicacao.descricao_publicacao}</Text>
+            </View>
+
+          </View>
+
+          <Pressable style={botao.button}>
+            <Link href="/" style={texto.text}>VOLTAR</Link>
+          </Pressable>
+
         </View>
 
-        <View style={styles.campo}>
-          <Text style={texto.tituloCampo}>Cidade</Text>
-          <View style={styles.divider} />
-          <Text style={texto.valorCampo}>{publicacao.cidade_publicacao}</Text>
-        </View>
+      </ScrollView>
 
-        <View style={styles.campo}>
-          <Text style={texto.tituloCampo}>Estado</Text>
-          <View style={styles.divider} />
-          <Text style={texto.valorCampo}>{publicacao.estado_publicacao}</Text>
-        </View>
-
-        <View style={styles.campo}>
-          <Text style={texto.tituloCampo}>Descrição</Text>
-          <View style={styles.divider} />
-          <Text style={texto.valorCampo}>{publicacao.descricao_publicacao}</Text>
-        </View>
-      </View>
-
-      <Pressable style={botao.button}>
-        <Link href="/" style={texto.text}>VOLTAR</Link>
-      </Pressable>
     </SafeAreaView>
   );
 }
@@ -112,8 +126,16 @@ export default function DetailsScreen() {
 const safe = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     paddingVertical: 20,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
   },
 });
 
@@ -123,7 +145,9 @@ const titulo = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     letterSpacing: 0.25,
-    marginBottom: 5,
+    marginBottom: 20,
+    position: 'absolute',
+    top: 20,
   },
 });
 
@@ -136,13 +160,15 @@ const botao = StyleSheet.create({
     borderRadius: 4,
     elevation: 3,
     backgroundColor: '#191970',
+    marginBottom: 10,
     marginTop: 10,
+    width: 300,
   },
 });
 
 const image = StyleSheet.create({
   image: {
-    width: 300,
+    width: '90%',
     height: 300,
     marginBottom: 10,
     borderRadius: 15,
@@ -155,12 +181,18 @@ const texto = StyleSheet.create({
     color: 'black',
     fontSize: 12,
     marginBottom: -8,
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   valorCampo: {
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
     marginTop: -3,
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   text: {
     fontSize: 16,
@@ -168,16 +200,21 @@ const texto = StyleSheet.create({
     letterSpacing: 0.25,
     color: 'white',
     fontWeight: 'bold',
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
 });
 
 const styles = StyleSheet.create({
   contentBox: {
-    backgroundColor: '#A9A9A9',
-    borderRadius: 10,
+    backgroundColor: '#D3D3D3',
     padding: 20,
+    borderRadius: 10,
+    width: 300,
     alignItems: 'center',
-    width: '90%',
+    marginTop: 100,
+    flex: 1,
   },
   campo: {
     backgroundColor: '#929cad',
@@ -191,5 +228,9 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'black',
     marginVertical: 8,
+  },
+  wrapper: {
+    alignItems: 'center',
+    paddingVertical: 20,
   },
 });
