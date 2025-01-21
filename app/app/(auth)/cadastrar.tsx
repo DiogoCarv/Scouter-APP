@@ -1,11 +1,14 @@
 import { Link, useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, Image, View, Alert, TextInput, ScrollView } from 'react-native';
+import { Pressable, StyleSheet, Text, Image, View, Alert, TextInput, ScrollView, Button } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
 import { useAuth } from "../../context/AuthProvider";
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 
 interface IndexProps {
   onPress?: () => void;
@@ -145,38 +148,45 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
           <View style={styles.wrapper}>
 
             <Text style={styles.title}>CADASTRAR</Text>
-            
+
             <View style={styles.contentBox}>
-              <Image
-                source={{
-                  uri: 'https://cokimoveis.com.br/img/sem_foto.png',
-                }}
-                style={styles.image}
-              />
+
+              <Pressable>
+                <Image
+                  source={{
+                    uri: 'https://cokimoveis.com.br/img/sem_foto.png',
+                  }}
+                  style={styles.image}
+                />
+              </Pressable>
 
               <TextInput
                 style={texto.input}
                 onChangeText={setEmail}
                 placeholder={'EMAIL'}
               />
+
               <TextInput
                 style={texto.input}
                 onChangeText={(value) => setNome(value)}
                 value={nome}
                 placeholder={'NOME'}
               />
+
               <TextInput
                 style={texto.input}
                 onChangeText={(value) => setSobrenome(value)}
                 value={sobrenome}
                 placeholder={'SOBRENOME'}
               />
+
               <TextInput
                 style={texto.input}
                 onChangeText={(value) => setCPF(value)}
                 value={cpf}
                 placeholder={'CPF'}
               />
+
               <Picker
                 selectedValue={estado}
                 style={texto.input}
@@ -187,6 +197,7 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
                   <Picker.Item key={uf} label={uf} value={uf} />
                 ))}
               </Picker>
+
               <Picker
                 selectedValue={cidade}
                 style={texto.input}
@@ -197,6 +208,7 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
                   <Picker.Item key={city} label={city} value={city} />
                 ))}
               </Picker>
+
               <View style={styles.inputWrapper}>
                 <TextInput
                   style={styles.input}
@@ -268,6 +280,36 @@ const botao = StyleSheet.create({
     marginBottom: 10,
     marginTop: 10,
     width: 300,
+  },
+});
+
+const camerastyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  message: {
+    textAlign: 'center',
+    paddingBottom: 10,
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    margin: 64,
+  },
+  button: {
+    flex: 1,
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
 

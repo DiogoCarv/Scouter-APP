@@ -1,9 +1,11 @@
-import { Pressable, StyleSheet, Text, View, TextInput, Alert } from 'react-native';
+import { Pressable, StyleSheet, Text, View, TextInput, Alert, Button, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from "../../../context/AuthProvider";
 import { Link, router, useRouter } from 'expo-router';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 
 interface IndexProps {
   onPress: () => void;
@@ -96,7 +98,7 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
       return;
     }
-  
+
     try {
       const response = await axios.post(
         'http://3.209.65.64:3002/publicacao',
@@ -113,7 +115,7 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
           },
         }
       );
-  
+
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Publicação cadastrada com sucesso!');
         router.replace("/(tabs)/(feed)");
@@ -124,7 +126,7 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
       console.error(error);
       Alert.alert('Erro', 'Não foi possível cadastrar a publicação. Tente novamente.');
     }
-  };  
+  };
 
   return (
     <View
@@ -149,8 +151,13 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
       >
         <Text style={styles.title}>PUBLICAR</Text>
 
-        <Pressable style={styles.button} onPress={onPress}>
-          <Link href="/" style={styles.text}>TIRAR FOTO</Link>
+        <Pressable>
+          <Image
+            source={{
+              uri: 'https://cokimoveis.com.br/img/sem_foto.png',
+            }}
+            style={styles.image}
+          />
         </Pressable>
 
         <TextInput
@@ -206,11 +213,55 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
 
 const texto = StyleSheet.create({
   input: {
-    height: 40,
+    height: 50,
     margin: 12,
     borderWidth: 1,
     padding: 10,
     width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 5,
+  },
+});
+
+const galeria = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  image: {
+    width: 200,
+    height: 200,
+  },
+});
+
+const camerastyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  message: {
+    textAlign: 'center',
+    paddingBottom: 10,
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    margin: 64,
+  },
+  button: {
+    flex: 1,
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
 
@@ -246,5 +297,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     letterSpacing: 0.25,
     color: 'white',
+  },
+  image: {
+    width: 150,
+    height: 150,
+    marginBottom: 20,
+    borderRadius: 75,
   },
 });
