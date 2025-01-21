@@ -149,7 +149,7 @@ export default function Login({ onPress, title = 'VOLTAR' }: IndexProps) {
             <View style={styles.contentBox}>
               <Image
                 source={{
-                  uri: 'https://s2-oglobo.glbimg.com/-0dni84YWVLwPxS6-f6_Wqkmy-4=/0x0:850x572/888x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_da025474c0c44edd99332dddb09cabe8/internal_photos/bs/2022/d/v/kFDwF0T3q2wkwvGH0DjA/whatsapp-image-2022-10-03-at-15.34.37.jpeg',
+                  uri: 'https://cokimoveis.com.br/img/sem_foto.png',
                 }}
                 style={styles.image}
               />

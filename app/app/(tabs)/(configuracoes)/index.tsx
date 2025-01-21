@@ -91,7 +91,7 @@ export default function UserSettings() {
           <Text style={titulo.header}>CONFIGURAÇÕES</Text>
           <View style={styles.contentBox}>
             <Image
-              source={{ uri: usuario.imagem_usuario || 'https://via.placeholder.com/150' }}
+              source={{ uri: usuario.imagem_usuario || 'https://cokimoveis.com.br/img/sem_foto.png' }}
               style={imagens.image}
             />
 
