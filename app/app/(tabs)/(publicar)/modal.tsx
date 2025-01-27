@@ -118,7 +118,52 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
       return;
     }
-
+  
+    let uploadedImageUrl = '';
+  
+    if (image) {
+      try {
+        console.log('Caminho da imagem:', image);
+  
+        // Buscando a imagem e convertendo para blob
+        const response = await fetch(image);
+        if (!response.ok) {
+          throw new Error('Erro ao buscar a imagem. Status: ' + response.status);
+        }
+        const blob = await response.blob();
+        console.log('Blob gerado:', blob);
+  
+        // Preparando o formData para upload
+        const formData = new FormData();
+        const filename = image.split('/').pop();
+        formData.append('file', blob, filename); // Arquivo da imagem
+        formData.append('upload_preset', 'Scouter'); // Nome do preset
+  
+        console.log('Iniciando upload para Cloudinary...');
+        const cloudinaryResponse = await fetch(
+          'https://api.cloudinary.com/v1_1/dyn6ts7im/image/upload',
+          {
+            method: 'POST',
+            body: formData,
+          }
+        );
+  
+        if (!cloudinaryResponse.ok) {
+          const errorText = await cloudinaryResponse.text();
+          console.error('Erro no upload:', errorText);
+          throw new Error('Erro no upload para o Cloudinary. Status: ' + cloudinaryResponse.status);
+        }
+  
+        const cloudinaryData = await cloudinaryResponse.json();
+        uploadedImageUrl = cloudinaryData.secure_url || '';
+        console.log('Upload concluído. URL da imagem:', uploadedImageUrl);
+      } catch (error) {
+        console.error('Erro ao carregar a imagem no Cloudinary:', error);
+        Alert.alert('Erro', 'Não foi possível carregar a imagem.');
+        return;
+      }
+    }
+  
     try {
       const response = await axios.post(
         'http://3.209.65.64:3002/publicacao',
@@ -128,6 +173,7 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
           cidade_publicacao: cidade,
           estado_publicacao: estado,
           id_usuario: idUsuario,
+          imagem_publicacao: uploadedImageUrl, // Incluindo a URL da imagem na requisição
         },
         {
           headers: {
@@ -135,7 +181,7 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
           },
         }
       );
-
+  
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Publicação cadastrada com sucesso!');
         router.replace("/(tabs)/(feed)");
@@ -143,10 +189,10 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
         Alert.alert('Erro', response.data.mensagem || 'Erro ao cadastrar a publicação.');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Erro no cadastro:', error);
       Alert.alert('Erro', 'Não foi possível cadastrar a publicação. Tente novamente.');
     }
-  };
+  };  
 
   return (
     <View

@@ -9,7 +9,6 @@ export default function Layout() {
     <AuthProvider>
       <Stack>
         <Stack.Screen name="(tabs)" options={{headerShown: false, title:"PRINCIPAL"}}/>
-        <Stack.Screen name="(cadastrar)" options={{headerShown: false, title:"PRINCIPAL"}}/>
         <Stack.Screen name="(auth)" options={{headerShown: false, title:"PRINCIPAL"}}/>
       </Stack>
     </AuthProvider>

@@ -23,8 +23,49 @@ app.use(compression());
 const helmet = require('helmet');
 app.use(helmet());
 
+const cloudinary = require('./cloudinary'); // Importa a configuração do Cloudinary
+const path = require('path');
+const fs = require('fs');
+
+const uploadImage = async (imagePath) => {
+    try {
+        const result = await cloudinary.uploader.upload(imagePath, {
+            folder: 'uploads', // Opcional: organiza imagens em uma pasta específica no Cloudinary
+        });
+
+        console.log('Upload bem-sucedido:', result.secure_url);
+        return result.secure_url; // Retorna o link da imagem hospedada
+    } catch (error) {
+        console.error('Erro ao fazer upload da imagem:', error);
+        throw error;
+    }
+};
+
+// Teste a função
+const testUpload = async () => {
+    const imagePath = path.join(__dirname, 'imagem_teste.jpg'); // Substitua pelo caminho do arquivo local
+    const url = await uploadImage(imagePath);
+    console.log('URL da imagem hospedada:', url);
+};
+
+testUpload();
+
 const jwt = require("jsonwebtoken");
 //const privateKey = "xxxyyyzzz123";
+
+const middlewareValidarJWT = (req, res, next) => {
+    const token = req.headers["x-access-token"];
+    if (!token) {
+        return res.status(401).json({ mensagem: "Token não fornecido." });
+    }
+    jwt.verify(token, privateKey, (err, userInfo) => {
+        if (err) {
+            return res.status(403).json({ mensagem: "Token inválido ou expirado." });
+        }
+        req.userInfo = userInfo;
+        next();
+    });
+};
 
 jwt.verify(jwtToken, privateKey, (err, userInfo) => {
     if (err) {
@@ -204,6 +245,22 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
             console.error(error);
             res.status(500).json({ mensagem: "Erro ao criar a publicação." });
         }
+    }
+});
+
+app.post('/upload', middlewareValidarJWT, async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ mensagem: "Nenhum arquivo enviado." });
+    }
+    try {
+        const filePath = req.file.path; // Defina o caminho correto para o arquivo enviado
+        const imageUrl = await uploadImage(filePath);
+        res.status(200).json({ mensagem: "Upload bem-sucedido.", url: imageUrl });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensagem: "Erro ao fazer upload da imagem." });
+    } finally {
+        fs.unlinkSync(req.file.path); // Remove o arquivo local após o upload
     }
 });
 
