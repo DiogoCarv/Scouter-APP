@@ -13,10 +13,12 @@ export default function Index() {
 
   useEffect(() => {
     const buscar = async () => {
+      console.log(user?.token);
       try {
         const response = await axios.get('publicacao', {
           headers: {
             Authorization: user?.token,
+          
           },
         });
 

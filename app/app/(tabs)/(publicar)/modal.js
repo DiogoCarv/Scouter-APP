@@ -71,13 +71,18 @@ export default function Model() {
       if (response.ok) {
         alert("Upload bem-sucedido!");
         console.log("Imgur Response:", data);
+        console.log(data.data.link);
+        //setImageUrl(data.data.link); // Retorna o link da imagem
+        return data.data.link;
       } else {
         alert(`Erro no upload: ${data.data.error}`);
+        throw new Error(data.data.error);
       }
     } catch (err) {
       setLoading(false);
       console.error(err);
       alert("Erro ao fazer upload. Tente novamente.");
+      throw err;
     }
   };
 
@@ -86,6 +91,16 @@ export default function Model() {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
       return;
     }
+
+    // Verifica se uma imagem foi selecionada
+    if (!file) {
+      Alert.alert('Erro', 'Por favor, selecione uma imagem.');
+      return;
+    }
+
+    setLoading(true);
+
+    
   };
 
   const estadosECidades = {

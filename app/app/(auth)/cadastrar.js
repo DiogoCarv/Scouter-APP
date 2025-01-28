@@ -21,7 +21,7 @@ export default function Login() {
   const [sobrenome, setSobrenome] = useState('');
   const [senha, setSenha] = useState('');
   const [cidadesDisponiveis, setCidadesDisponiveis] = useState([]);
-
+  //const [imageUrl, setImageUrl] = useState(null);
   const router = useRouter();
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -49,16 +49,16 @@ export default function Login() {
       alert("Nenhuma imagem selecionada!");
       return;
     }
-
+  
     setLoading(true);
-
+  
     const clientId = "d00263d36872f0e";
     const auth = "Client-ID " + clientId;
-
+  
     const formData = new FormData();
     formData.append("image", file);
     formData.append("type", "base64");
-
+  
     try {
       const response = await fetch("https://api.imgur.com/3/image/", {
         method: "POST",
@@ -68,27 +68,78 @@ export default function Login() {
         },
         body: formData,
       });
-
+  
       const data = await response.json();
       setLoading(false);
-
+  
       if (response.ok) {
         alert("Upload bem-sucedido!");
         console.log("Imgur Response:", data);
+        console.log(data.data.link);
+        //setImageUrl(data.data.link); // Retorna o link da imagem
+        return data.data.link;
       } else {
         alert(`Erro no upload: ${data.data.error}`);
+        throw new Error(data.data.error);
       }
     } catch (err) {
       setLoading(false);
       console.error(err);
       alert("Erro ao fazer upload. Tente novamente.");
+      throw err;
     }
   };
 
   const Cadastrar = async () => {
-    if (!titulo || !descricao || !cidade || !estado) {
+    // Verifica se todos os campos obrigatórios estão preenchidos
+    if (!email || !cpf || !cidade || !estado || !nome || !sobrenome || !senha) {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
       return;
+    }
+  
+    // Verifica se uma imagem foi selecionada
+    if (!file) {
+      Alert.alert('Erro', 'Por favor, selecione uma imagem.');
+      return;
+    }
+  
+    setLoading(true);
+  
+    try {
+      // Faz o upload da imagem para o Imgur
+      const imageUrl = await onFileUpload();
+  
+      // Prepara os dados do usuário para enviar ao servidor
+      const usuario = {
+        imagem_usuario: imageUrl,
+        nome_usuario: nome,
+        sobrenome_usuario: sobrenome,
+        email_usuario: email,
+        cpf_usuario: cpf.replace(/\D/g, ''), // Remove pontos e traços do CPF
+        estado_usuario: estado,
+        cidade_usuario: cidade,
+        senha_usuario: senha,
+      };
+      
+      console.log(usuario);
+      // Envia os dados do usuário para o servidor
+      const response = await axios.post('/usuarios', usuario);
+  
+      if (response.status === 201) {
+        Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!');
+        router.push("/(auth)/login"); // Redireciona para a tela de login
+      } else {
+        Alert.alert('Erro', 'Erro ao cadastrar usuário.');
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.response && error.response.status === 409) {
+        Alert.alert('Erro', 'E-mail ou CPF já cadastrados!');
+      } else {
+        Alert.alert('Erro', 'Erro ao cadastrar usuário. Tente novamente.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
