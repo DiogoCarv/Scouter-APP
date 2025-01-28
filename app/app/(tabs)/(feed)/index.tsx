@@ -78,7 +78,7 @@ export default function Index() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
-        <Text style={titulo.header}>MINHAS PUBLICAÇÕES</Text>
+        <Text style={titulo.header}>FEED</Text>
 
         <View style={safe.quadrado}>
 

@@ -100,7 +100,39 @@ export default function Model() {
 
     setLoading(true);
 
-    
+    try {
+      // Faz o upload da imagem para o Imgur
+      const imageUrl = await onFileUpload();
+  
+      // Prepara os dados do usuário para enviar ao servidor
+      const publicacao = {
+        imagem_publicacao: imageUrl,
+        titulo_publicacao: titulo,
+        descricao_publicao: descricao,
+        estado_publicacao: estado,
+        cidade_publicacao: cidade,
+      };
+      
+      console.log(usuario);
+      // Envia os dados do usuário para o servidor
+      const response = await axios.post('/publicacao', publicacao);
+  
+      if (response.status === 201) {
+        Alert.alert('Sucesso', 'Publicação cadastrada com sucesso!');
+        router.push("/(feed)"); // Redireciona para a tela de login
+      } else {
+        Alert.alert('Erro', 'Erro ao cadastrar publicação.');
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.response && error.response.status === 409) {
+        Alert.alert('Erro', 'E-mail ou CPF já cadastrados!');
+      } else {
+        Alert.alert('Erro', 'Erro ao cadastrar usuário. Tente novamente.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const estadosECidades = {
