@@ -41,15 +41,6 @@ const uploadImage = async (imagePath) => {
     }
 };
 
-// Teste a função
-const testUpload = async () => {
-    const imagePath = path.join(__dirname, 'imagem_teste.jpg'); // Substitua pelo caminho do arquivo local
-    const url = await uploadImage(imagePath);
-    console.log('URL da imagem hospedada:', url);
-};
-
-testUpload();
-
 const jwt = require("jsonwebtoken");
 //const privateKey = "xxxyyyzzz123";
 

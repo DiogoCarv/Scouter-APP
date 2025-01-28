@@ -8,69 +8,87 @@ import { Link, router, useRouter } from 'expo-router';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 
-interface IndexProps {
-  onPress: () => void;
-  title?: string;
-}
-
-export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
+export default function Model() {
   axios.defaults.baseURL = "http://3.209.65.64:3002/";
 
   const { user, logout } = useAuth();
 
-  const [image, setImage] = useState<string | null>(null);
+  const [titulo, setTitulo] = useState('');
+  const [descricao, setDescricao] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [estado, setEstado] = useState('');
+  const [cidadesDisponiveis, setCidadesDisponiveis] = useState([]);
+
+  const [image, setImage] = useState(null);
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      base64: true,
     });
 
     console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      setFile(result.assets[0].base64);
     }
   };
 
-  const [titulo, setTitulo] = useState('');
-  const [descricao, setDescricao] = useState('');
-  const [cidade, setCidade] = useState('');
-  const [estado, setEstado] = useState('');
-  const [cidadesDisponiveis, setCidadesDisponiveis] = useState<string[]>([]);
+  const onFileUpload = async () => {
+    if (!file) {
+      alert("Nenhuma imagem selecionada!");
+      return;
+    }
 
-  type Estado =
-    | 'Acre'
-    | 'Alagoas'
-    | 'Amapá'
-    | 'Amazonas'
-    | 'Bahia'
-    | 'Ceará'
-    | 'Distrito Federal'
-    | 'Espírito Santo'
-    | 'Goiás'
-    | 'Maranhão'
-    | 'Mato Grosso'
-    | 'Mato Grosso do Sul'
-    | 'Minas Gerais'
-    | 'Pará'
-    | 'Paraíba'
-    | 'Paraná'
-    | 'Pernambuco'
-    | 'Piauí'
-    | 'Rio de Janeiro'
-    | 'Rio Grande do Norte'
-    | 'Rio Grande do Sul'
-    | 'Rondônia'
-    | 'Roraima'
-    | 'Santa Catarina'
-    | 'São Paulo'
-    | 'Sergipe'
-    | 'Tocantins';
+    setLoading(true);
 
-  const estadosECidades: Record<Estado, string[]> = {
+    const clientId = "d00263d36872f0e";
+    const auth = "Client-ID " + clientId;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("type", "base64");
+
+    try {
+      const response = await fetch("https://api.imgur.com/3/image/", {
+        method: "POST",
+        headers: {
+          Authorization: auth,
+          Accept: "application/json",
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      setLoading(false);
+
+      if (response.ok) {
+        alert("Upload bem-sucedido!");
+        console.log("Imgur Response:", data);
+      } else {
+        alert(`Erro no upload: ${data.data.error}`);
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error(err);
+      alert("Erro ao fazer upload. Tente novamente.");
+    }
+  };
+
+  const Cadastrar = async () => {
+    if (!titulo || !descricao || !cidade || !estado) {
+      Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
+      return;
+    }
+  };
+
+  const estadosECidades = {
     'Acre': ['Rio Branco', 'Cruzeiro do Sul', 'Sena Madureira'],
     'Alagoas': ['Maceió', 'Arapiraca', 'Palmeira dos Índios'],
     'Amapá': ['Macapá', 'Santana', 'Oiapoque'],
@@ -100,10 +118,10 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
     'Tocantins': ['Palmas', 'Araguaína', 'Gurupi'],
   };
 
-  const handleEstadoChange = (value: string) => {
+  const handleEstadoChange = (value) => {
     if (value in estadosECidades) {
-      setEstado(value as Estado);
-      setCidadesDisponiveis(estadosECidades[value as Estado]);
+      setEstado(value);
+      setCidadesDisponiveis(estadosECidades[value]);
       setCidade('');
     } else {
       setEstado('');
@@ -112,87 +130,6 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
   };
 
   const idUsuario = user?.id;
-
-  const handleSubmit = async () => {
-    if (!titulo || !descricao || !cidade || !estado) {
-      Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
-      return;
-    }
-  
-    let uploadedImageUrl = '';
-  
-    if (image) {
-      try {
-        console.log('Caminho da imagem:', image);
-  
-        // Buscando a imagem e convertendo para blob
-        const response = await fetch(image);
-        if (!response.ok) {
-          throw new Error('Erro ao buscar a imagem. Status: ' + response.status);
-        }
-        const blob = await response.blob();
-        console.log('Blob gerado:', blob);
-  
-        // Preparando o formData para upload
-        const formData = new FormData();
-        const filename = image.split('/').pop();
-        formData.append('file', blob, filename); // Arquivo da imagem
-        formData.append('upload_preset', 'Scouter'); // Nome do preset
-  
-        console.log('Iniciando upload para Cloudinary...');
-        const cloudinaryResponse = await fetch(
-          'https://api.cloudinary.com/v1_1/dyn6ts7im/image/upload',
-          {
-            method: 'POST',
-            body: formData,
-          }
-        );
-  
-        if (!cloudinaryResponse.ok) {
-          const errorText = await cloudinaryResponse.text();
-          console.error('Erro no upload:', errorText);
-          throw new Error('Erro no upload para o Cloudinary. Status: ' + cloudinaryResponse.status);
-        }
-  
-        const cloudinaryData = await cloudinaryResponse.json();
-        uploadedImageUrl = cloudinaryData.secure_url || '';
-        console.log('Upload concluído. URL da imagem:', uploadedImageUrl);
-      } catch (error) {
-        console.error('Erro ao carregar a imagem no Cloudinary:', error);
-        Alert.alert('Erro', 'Não foi possível carregar a imagem.');
-        return;
-      }
-    }
-  
-    try {
-      const response = await axios.post(
-        'http://3.209.65.64:3002/publicacao',
-        {
-          titulo_publicacao: titulo,
-          descricao_publicacao: descricao,
-          cidade_publicacao: cidade,
-          estado_publicacao: estado,
-          id_usuario: idUsuario,
-          imagem_publicacao: uploadedImageUrl, // Incluindo a URL da imagem na requisição
-        },
-        {
-          headers: {
-            Authorization: user?.token,
-          },
-        }
-      );
-  
-      if (response.status === 201) {
-        Alert.alert('Sucesso', 'Publicação cadastrada com sucesso!');
-        router.replace("/(tabs)/(feed)");
-      } else {
-        Alert.alert('Erro', response.data.mensagem || 'Erro ao cadastrar a publicação.');
-      }
-    } catch (error) {
-      console.error('Erro no cadastro:', error);
-      Alert.alert('Erro', 'Não foi possível cadastrar a publicação. Tente novamente.');
-    }
-  };  
 
   return (
     <View
@@ -265,7 +202,7 @@ export default function Model({ onPress, title = 'VOLTAR' }: IndexProps) {
         </Picker>
 
 
-        <Pressable style={styles.button} onPress={handleSubmit}>
+        <Pressable style={styles.button} onPress={Cadastrar}>
           <Text style={styles.text}>PUBLICAR</Text>
         </Pressable>
 
