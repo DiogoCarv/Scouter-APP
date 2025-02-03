@@ -18,7 +18,6 @@ export default function Index() {
         const response = await axios.get('publicacao', {
           headers: {
             Authorization: user?.token,
-          
           },
         });
 

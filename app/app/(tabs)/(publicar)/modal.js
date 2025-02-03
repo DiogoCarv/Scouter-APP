@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from "../../../context/AuthProvider";
 import { Link, router, useRouter } from 'expo-router';
-
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function Model() {
@@ -45,16 +43,16 @@ export default function Model() {
       alert("Nenhuma imagem selecionada!");
       return;
     }
-
+  
     setLoading(true);
-
+  
     const clientId = "d00263d36872f0e";
     const auth = "Client-ID " + clientId;
-
+  
     const formData = new FormData();
     formData.append("image", file);
     formData.append("type", "base64");
-
+  
     try {
       const response = await fetch("https://api.imgur.com/3/image/", {
         method: "POST",
@@ -64,10 +62,10 @@ export default function Model() {
         },
         body: formData,
       });
-
+  
       const data = await response.json();
       setLoading(false);
-
+  
       if (response.ok) {
         alert("Upload bem-sucedido!");
         console.log("Imgur Response:", data);
@@ -92,7 +90,6 @@ export default function Model() {
       return;
     }
 
-    // Verifica se uma imagem foi selecionada
     if (!file) {
       Alert.alert('Erro', 'Por favor, selecione uma imagem.');
       return;
@@ -101,34 +98,38 @@ export default function Model() {
     setLoading(true);
 
     try {
-      // Faz o upload da imagem para o Imgur
       const imageUrl = await onFileUpload();
-  
-      // Prepara os dados do usuário para enviar ao servidor
+
+      console.log(user.id);
+
       const publicacao = {
         imagem_publicacao: imageUrl,
         titulo_publicacao: titulo,
-        descricao_publicao: descricao,
+        descricao_publicacao: descricao,
         estado_publicacao: estado,
         cidade_publicacao: cidade,
+        id_usuario: user.id,
       };
-      
-      console.log(usuario);
-      // Envia os dados do usuário para o servidor
-      const response = await axios.post('/publicacao', publicacao);
-  
+
+      console.log(publicacao);
+
+      const response = await axios.post('/publicacao',publicacao, {
+        headers: {
+          'Authorization': `${user.token}`,
+        }});
+
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Publicação cadastrada com sucesso!');
-        router.push("/(feed)"); // Redireciona para a tela de login
+        router.push("/(feed)");
       } else {
         Alert.alert('Erro', 'Erro ao cadastrar publicação.');
       }
     } catch (error) {
       console.error(error);
-      if (error.response && error.response.status === 409) {
-        Alert.alert('Erro', 'E-mail ou CPF já cadastrados!');
+      if (error.response && error.response.status === 400) {
+        Alert.alert('Erro', 'Usuário associado não encontrado!');
       } else {
-        Alert.alert('Erro', 'Erro ao cadastrar usuário. Tente novamente.');
+        Alert.alert('Erro', 'Erro ao cadastrar publicação. Tente novamente.');
       }
     } finally {
       setLoading(false);
@@ -175,8 +176,6 @@ export default function Model() {
       setCidadesDisponiveis([]);
     }
   };
-
-  const idUsuario = user?.id;
 
   return (
     <View
@@ -248,13 +247,8 @@ export default function Model() {
           ))}
         </Picker>
 
-
         <Pressable style={styles.button} onPress={Cadastrar}>
           <Text style={styles.text}>PUBLICAR</Text>
-        </Pressable>
-
-        <Pressable style={styles.button} onPress={onPress}>
-          <Link href="/" style={styles.text}>{title}</Link>
         </Pressable>
       </View>
     </View>
@@ -273,51 +267,6 @@ const texto = StyleSheet.create({
   },
 });
 
-const galeria = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    width: 200,
-    height: 200,
-  },
-});
-
-const camerastyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  message: {
-    textAlign: 'center',
-    paddingBottom: 10,
-  },
-  camera: {
-    flex: 1,
-  },
-  buttonContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    margin: 64,
-  },
-  button: {
-    flex: 1,
-    alignSelf: 'flex-end',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    flexWrap: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
-});
-
 const styles = StyleSheet.create({
   title: {
     fontSize: 20,
@@ -325,9 +274,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     letterSpacing: 0.25,
     marginBottom: 5,
-    flexWrap: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
   },
   input: {
     height: 40,
@@ -353,9 +299,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     letterSpacing: 0.25,
     color: 'white',
-    flexWrap: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
   },
   image: {
     width: 150,
