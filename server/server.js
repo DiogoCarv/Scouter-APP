@@ -215,15 +215,18 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
         data.descricao_publicacao,
         data.estado_publicacao,
         data.cidade_publicacao,
-        data.id_usuario
+        data.id_usuario,
+        data.hora_publicacao,
+        data.latitude_publicacao,
+        data.longitude_publicacao,
     ];
 
     try {
         const query = `
             INSERT INTO publicacao (
                 imagem_publicacao, titulo_publicacao, descricao_publicacao, estado_publicacao, 
-                cidade_publicacao, id_usuario
-            ) VALUES (?, ?, ?, ?, ?, ?)
+                cidade_publicacao, id_usuario, hora_publicacao, latitude_publicacao, longitude_publicacao
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         await resultSQLQuery(query, publicacao);
@@ -371,7 +374,7 @@ app.put('/publicacao/:id_publicacao', middlewareValidarJWT, async (req, res) => 
             'titulo_publicacao',
             'descricao_publicacao',
             'estado_publicacao',
-            'cidade_publicacao'
+            'cidade_publicacao',
         ];
 
         const camposAtualizados = {};
@@ -414,7 +417,10 @@ app.get('/publicacao/:id_publicacao', middlewareValidarJWT, async (req, res) => 
                 p.descricao_publicacao, 
                 p.estado_publicacao, 
                 p.cidade_publicacao, 
-                p.id_usuario, 
+                p.id_usuario,
+                p.hora_publicacao,
+                p.latitude_publicacao,
+                p.longitude_publicacao,
                 u.nome_usuario, 
                 u.sobrenome_usuario 
             FROM publicacao p
@@ -475,8 +481,11 @@ app.get('/publicacao', middlewareValidarJWT, async (req, res) => {
                 p.imagem_publicacao, 
                 p.descricao_publicacao, 
                 p.estado_publicacao, 
-                p.cidade_publicacao, 
-                p.id_usuario, 
+                p.cidade_publicacao,
+                p.id_usuario,
+                p.hora_publicacao,
+                p.latitude_publicacao,
+                p.longitude_publicacao,
                 u.nome_usuario, 
                 u.sobrenome_usuario 
             FROM publicacao p
