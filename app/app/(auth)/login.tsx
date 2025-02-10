@@ -15,9 +15,31 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [senhaVisivel, setSenhaVisivel] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
+
   const alternarVisibilidadeSenha = () => {
     setSenhaVisivel(!senhaVisivel);
   };
+
+    useEffect(() => {
+      (async () => {
+        try {
+          let { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== 'granted') {
+            setErrorMsg('Permissão para acessar a localização foi negada.');
+            return;
+          }
+  
+          let location = await Location.getCurrentPositionAsync({});
+          const { latitude, longitude } = location.coords;
+  
+          await setLocation(latitude, longitude);
+        } catch (error) {
+          console.error("Erro ao obter localização:", error);
+          setErrorMsg('Não foi possível obter a localização. Verifique se o GPS está ativado.');
+        }
+      })();
+    }, []);
 
   const handleLogin = async () => {
     if (!email || !senha) {
