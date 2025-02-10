@@ -19,19 +19,6 @@ export default function Login() {
     setSenhaVisivel(!senhaVisivel);
   };
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert("Permissão negada", "Permissão para acessar a localização foi negada.");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      await setLocation(location.coords.latitude, location.coords.longitude);
-    })();
-  }, []);
-
   const handleLogin = async () => {
     if (!email || !senha) {
       Alert.alert("Erro", "Por favor, preencha e-mail e senha!");
@@ -45,24 +32,30 @@ export default function Login() {
       console.log("Resposta da API:", response.data);
 
       if (response.data.mensagem === "Login realizado com sucesso!") {
-        const { token, id_usuario, nome_usuario } = response.data;
+        let { token, id_usuario, nome_usuario, latitude, longitude } = response.data;
 
-        await setUser({
+        if (latitude === undefined || longitude === undefined) {
+          console.log("Localização não definida, obtendo novamente...");
+          const location = await Location.getCurrentPositionAsync({});
+          latitude = location.coords.latitude;
+          longitude = location.coords.longitude;
+          await setLocation(latitude, longitude);
+        }
+
+        setUser({
           name: nome_usuario,
           id: id_usuario,
           token: token,
+          latitude: latitude,
+          longitude: longitude,
         });
 
-        const location = await getLocation();
-        if (location) {
-          console.log("Localização do usuário:", location);
-        }
-
+        console.log("Localização do usuário:", { latitude, longitude });
         router.push("../../(tabs)/(feed)");
       } else {
         Alert.alert("Erro", "Credenciais inválidas! Verifique seu e-mail e senha.");
       }
-    } catch (error: unknown) {
+    } catch (error) {
       if (axios.isAxiosError(error)) {
         Alert.alert("Erro", error.response?.data?.mensagem || "Erro ao fazer a requisição.");
       } else if (error instanceof Error) {
@@ -75,117 +68,71 @@ export default function Login() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={safe.container}>
+      <SafeAreaView style={styles.container}>
         <Text style={styles.title}>LOGIN</Text>
-
         <TextInput
-          style={texto.input}
+          style={styles.input}
           onChangeText={setEmail}
           value={email}
           placeholder="EMAIL"
           keyboardType="email-address"
           autoCapitalize="none"
         />
-
         <View style={styles.inputWrapper}>
-
           <TextInput
             style={styles.input}
             secureTextEntry={!senhaVisivel}
             onChangeText={setSenha}
             value={senha}
             placeholder="SENHA"
-            placeholderTextColor="#888"
           />
-          
           <Pressable onPress={alternarVisibilidadeSenha} style={styles.iconWrapper}>
-            <Ionicons
-              name={senhaVisivel ? 'eye' : 'eye-off'}
-              size={24}
-              color="#888"
-            />
+            <Ionicons name={senhaVisivel ? 'eye' : 'eye-off'} size={24} color="#888" />
           </Pressable>
-
         </View>
-
-        <Pressable style={botao.button} onPress={handleLogin}>
+        <Pressable style={styles.button} onPress={handleLogin}>
           <Text style={styles.text}>ENTRAR</Text>
-        </Pressable>
-
-        <Pressable style={botao.button} onPress={() => router.push('./cadastrar')}>
-          <Text style={styles.text}>NÃO TENHO CONTA</Text>
         </Pressable>
       </SafeAreaView>
     </SafeAreaProvider>
   );
 }
 
-const texto = StyleSheet.create({
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    width: '80%',
-  },
-});
-
-const safe = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-});
-
-const botao = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 4,
-    elevation: 3,
-    backgroundColor: '#191970',
-    marginTop: 20,
-    width: 300,
-  },
-});
-
-const styles = StyleSheet.create({
   title: {
     fontSize: 20,
-    color: 'black',
     fontWeight: 'bold',
-    letterSpacing: 0.25,
-    marginBottom: 5,
+    marginBottom: 10,
   },
-  text: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: 'bold',
-    letterSpacing: 0.25,
-    color: 'white',
+  input: {
+    width: '80%',
+    height: 40,
+    borderWidth: 1,
+    padding: 10,
+    marginVertical: 10,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
     paddingHorizontal: 10,
-    marginVertical: 12,
-    height: 40,
     width: '80%',
-    backgroundColor: '#fff',
-  },
-  input: {
-    flex: 1,
-    height: '100%',
-    color: '#000',
-    width: '100%',
+    height: 40,
   },
   iconWrapper: {
     marginLeft: 8,
+  },
+  button: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#191970',
+  },
+  text: {
+    color: 'white',
   },
 });

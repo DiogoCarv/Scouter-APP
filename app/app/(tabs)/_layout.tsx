@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 export default function TabLayout() {
   return (
     <Tabs>
+
       <Tabs.Screen
         name="(feed)"
         options={{
@@ -14,6 +15,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="(publicar)"
         options={{
@@ -24,6 +26,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="(notificacao)"
         options={{
@@ -34,6 +37,7 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="(configuracoes)"
         options={{
@@ -44,6 +48,15 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      <Tabs.Screen
+        name="(maps)"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+
     </Tabs>
   );
 }

@@ -5,11 +5,13 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from "../../../context/AuthProvider";
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import * as Location from 'expo-location';
 
 export default function Index() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, setLocation, getLocation } = useAuth();
   const [data, setData] = useState([]);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const userId = user?.id;
 
@@ -35,6 +37,26 @@ export default function Index() {
 
     buscar();
   }, [userId]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permissão para acessar a localização foi negada.');
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = location.coords;
+
+        await setLocation(latitude, longitude);
+      } catch (error) {
+        console.error("Erro ao obter localização:", error);
+        setErrorMsg('Não foi possível obter a localização. Verifique se o GPS está ativado.');
+      }
+    })();
+  }, []);
 
   type ItemProps = {
     item: ItemData;
@@ -200,5 +222,6 @@ const botao = StyleSheet.create({
     backgroundColor: '#191970',
     marginTop: 20,
     width: 300,
+    marginBottom: 10,
   },
 });
