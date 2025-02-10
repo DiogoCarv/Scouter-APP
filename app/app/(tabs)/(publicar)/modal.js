@@ -21,11 +21,9 @@ export default function Model() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Estados para armazenar a latitude e longitude
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
 
-  // Obter a localização do AuthProvider
   useEffect(() => {
     const fetchLocation = async () => {
       const location = await getLocation();
@@ -124,8 +122,8 @@ export default function Model() {
       console.log(user.id);
   
       const agora = new Date();
-      const datePublicacao = agora.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-      const horaPublicacao = agora.toTimeString().split(' ')[0]; // Formato HH:MM:SS
+      const datePublicacao = agora.toISOString().split('T')[0];
+      const horaPublicacao = agora.toTimeString().split(' ')[0];
   
       const publicacao = {
         imagem_publicacao: imageUrl,
@@ -134,13 +132,13 @@ export default function Model() {
         estado_publicacao: estado,
         cidade_publicacao: cidade,
         id_usuario: user.id,
-        date_publicacao: datePublicacao, // Data da publicação
-        hora_publicacao: horaPublicacao, // Hora da publicação
-        latitude_publicacao: latitude, // Latitude
-        longitude_publicacao: longitude, // Longitude
+        date_publicacao: datePublicacao,
+        hora_publicacao: horaPublicacao,
+        latitude_publicacao: latitude,
+        longitude_publicacao: longitude,
       };
   
-      console.log("Dados da publicação:", publicacao); // Verifique se os dados estão corretos
+      console.log("Dados da publicação:", publicacao);
   
       const response = await axios.post('/publicacao', publicacao, {
         headers: {
@@ -240,43 +238,52 @@ export default function Model() {
           />
         </Pressable>
 
-        <TextInput
-          style={styles.input}
-          placeholder="TÍTULO"
-          onChangeText={setTitulo}
-          value={titulo}
-          maxLength={100}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="DESCRIÇÃO"
-          onChangeText={setDescricao}
-          value={descricao}
-          maxLength={100}
-        />
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.input}
+            placeholder="TÍTULO"
+            onChangeText={setTitulo}
+            value={titulo}
+            maxLength={100}
+          />
+        </View>
 
-        <Picker
-          selectedValue={estado}
-          style={texto.input}
-          onValueChange={handleEstadoChange}
-        >
-          <Picker.Item label="Selecione o Estado" value="" />
-          {Object.keys(estadosECidades).map((uf) => (
-            <Picker.Item key={uf} label={uf} value={uf} />
-          ))}
-        </Picker>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.input}
+            placeholder="DESCRIÇÃO"
+            onChangeText={setDescricao}
+            value={descricao}
+            maxLength={100}
+          />
+        </View>
 
-        <Picker
-          selectedValue={cidade}
-          style={texto.input}
-          onValueChange={setCidade}
-          enabled={cidadesDisponiveis.length > 0}
-        >
-          <Picker.Item label="Selecione a Cidade" value="" />
-          {cidadesDisponiveis.map((city) => (
-            <Picker.Item key={city} label={city} value={city} />
-          ))}
-        </Picker>
+        <View style={styles.inputWrapper}>
+          <Picker
+            selectedValue={estado}
+            style={{ height: 50, width: '100%', color: '#000' }}
+            onValueChange={handleEstadoChange}
+          >
+            <Picker.Item label="Selecione o Estado" value="" />
+            {Object.keys(estadosECidades).map((uf) => (
+              <Picker.Item key={uf} label={uf} value={uf} />
+            ))}
+          </Picker>
+        </View>
+
+        <View style={styles.inputWrapper}>
+          <Picker
+            selectedValue={cidade}
+            style={{ height: 50, width: '100%', color: '#000' }}
+            onValueChange={setCidade}
+            enabled={cidadesDisponiveis.length > 0}
+          >
+            <Picker.Item label="Selecione a Cidade" value="" />
+            {cidadesDisponiveis.map((city) => (
+              <Picker.Item key={city} label={city} value={city} />
+            ))}
+          </Picker>
+        </View>
 
         <Pressable style={styles.button} onPress={Cadastrar}>
           <Text style={styles.text}>PUBLICAR</Text>
@@ -286,18 +293,6 @@ export default function Model() {
   );
 }
 
-const texto = StyleSheet.create({
-  input: {
-    height: 50,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-  },
-});
-
 const styles = StyleSheet.create({
   title: {
     fontSize: 20,
@@ -306,13 +301,23 @@ const styles = StyleSheet.create({
     letterSpacing: 0.25,
     marginBottom: 5,
   },
-  input: {
-    height: 40,
-    width: '80%',
-    margin: 12,
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
-    padding: 10,
+    borderColor: '#ccc',
     borderRadius: 5,
+    paddingHorizontal: 10,
+    marginVertical: 12,
+    height: 50,
+    width: '80%',
+    backgroundColor: '#fff',
+  },
+  input: {
+    flex: 1,
+    height: '100%',
+    color: '#000',
+    width: '100%',
   },
   button: {
     alignItems: 'center',
