@@ -1,23 +1,36 @@
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, Alert, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from "../../context/AuthProvider";
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 
 export default function Login() {
   const router = useRouter();
   axios.defaults.baseURL = "http://3.209.65.64:3002/";
-  const { setUser } = useAuth();
+  const { setUser, setLocation, getLocation } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-
   const [senhaVisivel, setSenhaVisivel] = useState(false);
 
   const alternarVisibilidadeSenha = () => {
     setSenhaVisivel(!senhaVisivel);
   };
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("Permissão negada", "Permissão para acessar a localização foi negada.");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      await setLocation(location.coords.latitude, location.coords.longitude);
+    })();
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !senha) {
@@ -39,6 +52,11 @@ export default function Login() {
           id: id_usuario,
           token: token,
         });
+
+        const location = await getLocation();
+        if (location) {
+          console.log("Localização do usuário:", location);
+        }
 
         router.push("../../(tabs)/(feed)");
       } else {

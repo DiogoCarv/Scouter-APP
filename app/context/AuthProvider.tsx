@@ -6,18 +6,24 @@ type User = {
   name: string;
   id: string;
   token?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 type AuthType = {
   user: User | null;
   setUser: (user: User | null) => void;
   logout: () => Promise<void>;
+  setLocation: (latitude: number, longitude: number) => Promise<void>;
+  getLocation: () => Promise<{ latitude: number, longitude: number } | null>;
 };
 
 const AuthContext = createContext<AuthType>({
   user: null,
   setUser: () => {},
   logout: async () => {},
+  setLocation: async () => {},
+  getLocation: async () => null,
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -66,6 +72,8 @@ export function AuthProvider({ children }: { children: JSX.Element }): JSX.Eleme
         name: userData.name || "",
         id: userData.id,
         token: userData.token,
+        latitude: userData.latitude,
+        longitude: userData.longitude,
       };
 
       await AsyncStorage.setItem("user", JSON.stringify(user));
@@ -81,10 +89,24 @@ export function AuthProvider({ children }: { children: JSX.Element }): JSX.Eleme
     setUser(null);
   };
 
+  const setLocation = async (latitude: number, longitude: number) => {
+    if (user) {
+      const updatedUser = { ...user, latitude, longitude };
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+    }
+  };
+
+  const getLocation = async () => {
+    return user ? { latitude: user.latitude ?? 0, longitude: user.longitude ?? 0 } : null;
+  };
+
   const authContext: AuthType = {
     user,
     setUser: saveUser,
     logout,
+    setLocation,
+    getLocation,
   };
 
   return <AuthContext.Provider value={authContext}>{children}</AuthContext.Provider>;

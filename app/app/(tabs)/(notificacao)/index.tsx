@@ -1,11 +1,13 @@
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ScrollView, Pressable } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from "../../../context/AuthProvider";
+import { useRouter } from 'expo-router';
 import axios from 'axios';
 
 export default function Index() {
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [data, setData] = useState([]);
 
@@ -77,6 +79,10 @@ export default function Index() {
     <SafeAreaProvider>
       <SafeAreaView style={safe.container}>
         <Text style={titulo.header}>MINHAS PUBLICAÇÕES</Text>
+
+                <Pressable style={botao.button} onPress={() => router.push('../(maps)/mapsfeed')}>
+                  <Text style={styles.text}>VER O MAPA</Text>
+                </Pressable>
 
         <View style={safe.quadrado}>
 
@@ -170,6 +176,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
+  text: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: 'bold',
+    letterSpacing: 0.25,
+    color: 'white',
+  },
 });
 
 const imagem = StyleSheet.create({
@@ -179,5 +192,19 @@ const imagem = StyleSheet.create({
     borderRadius: 8,
     resizeMode: 'cover',
     overflow: 'hidden',
+  },
+});
+
+const botao = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 4,
+    elevation: 3,
+    backgroundColor: '#191970',
+    marginTop: 20,
+    width: 300,
   },
 });
