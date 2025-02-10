@@ -116,7 +116,7 @@ export default function Index() {
               keyExtractor={(item) => item.id_publicacao}
             />
           ) : (
-            <Text style={texto.noPosts}>Você ainda não tem publicações.</Text>
+            <Text style={texto.noPosts}>Ainda não tem publicações.</Text>
           )}
 
         </View>
