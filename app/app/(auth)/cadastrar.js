@@ -1,5 +1,5 @@
 import { Link, useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, Image, View, Alert, TextInput, ScrollView, Button } from 'react-native';
+import { Pressable, StyleSheet, Text, Image, View, Alert, TextInput, ScrollView, Button, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
@@ -21,7 +21,6 @@ export default function Login() {
   const [sobrenome, setSobrenome] = useState('');
   const [senha, setSenha] = useState('');
   const [cidadesDisponiveis, setCidadesDisponiveis] = useState([]);
-  //const [imageUrl, setImageUrl] = useState(null);
   const router = useRouter();
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
@@ -49,16 +48,16 @@ export default function Login() {
       alert("Nenhuma imagem selecionada!");
       return;
     }
-  
+
     setLoading(true);
-  
+
     const clientId = "d00263d36872f0e";
     const auth = "Client-ID " + clientId;
-  
+
     const formData = new FormData();
     formData.append("image", file);
     formData.append("type", "base64");
-  
+
     try {
       const response = await fetch("https://api.imgur.com/3/image/", {
         method: "POST",
@@ -68,15 +67,14 @@ export default function Login() {
         },
         body: formData,
       });
-  
+
       const data = await response.json();
       setLoading(false);
-  
+
       if (response.ok) {
         alert("Upload bem-sucedido!");
         console.log("Imgur Response:", data);
         console.log(data.data.link);
-        //setImageUrl(data.data.link); // Retorna o link da imagem
         return data.data.link;
       } else {
         alert(`Erro no upload: ${data.data.error}`);
@@ -91,43 +89,38 @@ export default function Login() {
   };
 
   const Cadastrar = async () => {
-    // Verifica se todos os campos obrigatórios estão preenchidos
     if (!email || !cpf || !cidade || !estado || !nome || !sobrenome || !senha) {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
       return;
     }
-  
-    // Verifica se uma imagem foi selecionada
+
     if (!file) {
       Alert.alert('Erro', 'Por favor, selecione uma imagem.');
       return;
     }
-  
+
     setLoading(true);
-  
+
     try {
-      // Faz o upload da imagem para o Imgur
       const imageUrl = await onFileUpload();
-  
-      // Prepara os dados do usuário para enviar ao servidor
+
       const usuario = {
         imagem_usuario: imageUrl,
         nome_usuario: nome,
         sobrenome_usuario: sobrenome,
         email_usuario: email,
-        cpf_usuario: cpf.replace(/\D/g, ''), // Remove pontos e traços do CPF
+        cpf_usuario: cpf.replace(/\D/g, ''),
         estado_usuario: estado,
         cidade_usuario: cidade,
         senha_usuario: senha,
       };
-      
+
       console.log(usuario);
-      // Envia os dados do usuário para o servidor
       const response = await axios.post('/usuarios', usuario);
-  
+
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!');
-        router.push("/(auth)/login"); // Redireciona para a tela de login
+        router.push("/(auth)/login");
       } else {
         Alert.alert('Erro', 'Erro ao cadastrar usuário.');
       }
@@ -209,19 +202,18 @@ export default function Login() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={safe.container}>
-
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
         <ScrollView
-          style={safe.scroll}
           contentContainerStyle={safe.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
-
           <View style={styles.wrapper}>
-
             <Text style={styles.title}>CADASTRAR</Text>
 
             <View style={styles.contentBox}>
-
               <Pressable onPress={pickImage}>
                 <Image
                   source={{
@@ -231,64 +223,76 @@ export default function Login() {
                 />
               </Pressable>
 
-              <TextInput
-                style={texto.input}
-                onChangeText={setEmail}
-                placeholder={'EMAIL'}
-              />
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={setEmail}
+                  placeholder={'EMAIL'}
+                />
+              </View>
 
-              <TextInput
-                style={texto.input}
-                onChangeText={(value) => {
-                  const filteredValue = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, ''); // Permite apenas letras e espaços
-                  setNome(filteredValue);
-                }}
-                value={nome}
-                placeholder={'NOME'}
-              />
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(value) => {
+                    const filteredValue = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+                    setNome(filteredValue);
+                  }}
+                  value={nome}
+                  placeholder={'NOME'}
+                />
+              </View>
 
-              <TextInput
-                style={texto.input}
-                onChangeText={(value) => {
-                  const filteredValue = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, ''); // Permite apenas letras e espaços
-                  setSobrenome(filteredValue);
-                }}
-                value={sobrenome}
-                placeholder={'SOBRENOME'}
-              />
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(value) => {
+                    const filteredValue = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+                    setSobrenome(filteredValue);
+                  }}
+                  value={sobrenome}
+                  placeholder={'SOBRENOME'}
+                />
+              </View>
 
-              <TextInput
-                style={texto.input}
-                onChangeText={(value) => {
-                  const formattedCPF = formatCPF(value);
-                  setCPF(formattedCPF);
-                }}
-                value={cpf}
-                placeholder={'CPF'}
-                keyboardType="numeric"
-              />
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={(value) => {
+                    const formattedCPF = formatCPF(value);
+                    setCPF(formattedCPF);
+                  }}
+                  value={cpf}
+                  placeholder={'CPF'}
+                  keyboardType="numeric"
+                />
+              </View>
 
-              <Picker
-                selectedValue={estado}
-                style={texto.input}
-                onValueChange={handleEstadoChange}
-              >
-                <Picker.Item label="Selecione o Estado" value="" />
-                {Object.keys(estadosECidades).map((uf) => (
-                  <Picker.Item key={uf} label={uf} value={uf} />
-                ))}
-              </Picker>
+              <View style={styles.inputWrapper}>
+                <Picker
+                  selectedValue={estado}
+                  style={{ height: 50, width: '100%', color: '#000' }} // Ajuste no estilo do Picker
+                  onValueChange={handleEstadoChange}
+                >
+                  <Picker.Item label="Estado" value="" />
+                  {Object.keys(estadosECidades).map((uf) => (
+                    <Picker.Item key={uf} label={uf} value={uf} />
+                  ))}
+                </Picker>
+              </View>
 
-              <Picker
-                selectedValue={cidade}
-                style={texto.input}
-                onValueChange={setCidade}
-              >
-                <Picker.Item label="Selecione a Cidade" value="" />
-                {cidadesDisponiveis.map((city) => (
-                  <Picker.Item key={city} label={city} value={city} />
-                ))}
-              </Picker>
+              <View style={styles.inputWrapper}>
+                <Picker
+                  selectedValue={cidade}
+                  style={{ height: 50, width: '100%', color: '#000' }} // Ajuste no estilo do Picker
+                  onValueChange={setCidade}
+                >
+                  <Picker.Item label="Cidade" value="" />
+                  {cidadesDisponiveis.map((city) => (
+                    <Picker.Item key={city} label={city} value={city} />
+                  ))}
+                </Picker>
+              </View>
 
               <View style={styles.inputWrapper}>
                 <TextInput
@@ -316,7 +320,7 @@ export default function Login() {
             </Pressable>
           </View>
         </ScrollView>
-      </SafeAreaView>
+      </KeyboardAvoidingView>
     </SafeAreaProvider>
   );
 }
@@ -334,13 +338,6 @@ const texto = StyleSheet.create({
 });
 
 const safe = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  scroll: {
-    flex: 1,
-  },
   scrollContent: {
     flexGrow: 1,
     alignItems: 'center',
@@ -361,36 +358,6 @@ const botao = StyleSheet.create({
     marginBottom: 10,
     marginTop: 10,
     width: 300,
-  },
-});
-
-const camerastyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  message: {
-    textAlign: 'center',
-    paddingBottom: 10,
-  },
-  camera: {
-    flex: 1,
-  },
-  buttonContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    margin: 64,
-  },
-  button: {
-    flex: 1,
-    alignSelf: 'flex-end',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
   },
 });
 
