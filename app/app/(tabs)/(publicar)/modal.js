@@ -43,16 +43,16 @@ export default function Model() {
       alert("Nenhuma imagem selecionada!");
       return;
     }
-  
+
     setLoading(true);
-  
+
     const clientId = "d00263d36872f0e";
     const auth = "Client-ID " + clientId;
-  
+
     const formData = new FormData();
     formData.append("image", file);
     formData.append("type", "base64");
-  
+
     try {
       const response = await fetch("https://api.imgur.com/3/image/", {
         method: "POST",
@@ -62,10 +62,10 @@ export default function Model() {
         },
         body: formData,
       });
-  
+
       const data = await response.json();
       setLoading(false);
-  
+
       if (response.ok) {
         alert("Upload bem-sucedido!");
         console.log("Imgur Response:", data);
@@ -102,6 +102,15 @@ export default function Model() {
 
       console.log(user.id);
 
+      // Gerar a data e hora atuais separadamente
+      const agora = new Date();
+      const datePublicacao = agora.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      const horaPublicacao = agora.toTimeString().split(' ')[0]; // Formato HH:MM:SS
+
+      // Verifique se a data e a hora estão corretas
+      console.log("Data da publicação:", datePublicacao);
+      console.log("Hora da publicação:", horaPublicacao);
+
       const publicacao = {
         imagem_publicacao: imageUrl,
         titulo_publicacao: titulo,
@@ -109,14 +118,20 @@ export default function Model() {
         estado_publicacao: estado,
         cidade_publicacao: cidade,
         id_usuario: user.id,
+        date_publicacao: datePublicacao, // Novo campo para a data
+        hora_publicacao: horaPublicacao, // Novo campo para a hora
+        latitude_publicacao: null,
+        longitude_publicacao: null,
       };
 
-      console.log(publicacao);
+      console.log("Dados da publicação:", publicacao); // Verifique se o objeto está correto
 
-      const response = await axios.post('/publicacao',publicacao, {
+      const response = await axios.post('/publicacao', publicacao, {
         headers: {
           'Authorization': `${user.token}`,
-        }});
+          'Content-Type': 'application/json', // Garantir que o conteúdo seja JSON
+        }
+      });
 
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Publicação cadastrada com sucesso!');
@@ -125,7 +140,7 @@ export default function Model() {
         Alert.alert('Erro', 'Erro ao cadastrar publicação.');
       }
     } catch (error) {
-      console.error(error);
+      console.error("Erro ao cadastrar publicação:", error);
       if (error.response && error.response.status === 400) {
         Alert.alert('Erro', 'Usuário associado não encontrado!');
       } else {

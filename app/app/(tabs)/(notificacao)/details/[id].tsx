@@ -14,7 +14,7 @@ export default function SecondDetailsScreen({ onPress, title = 'VOLTAR' }: Index
   const { user, logout } = useAuth();
   const { id } = useLocalSearchParams();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [publicacao, setPublicacao] = useState({
     titulo_publicacao: '',
@@ -24,12 +24,13 @@ export default function SecondDetailsScreen({ onPress, title = 'VOLTAR' }: Index
     cidade_publicacao: '',
     nome_usuario: '',
     sobrenome_usuario: '',
+    date_publicacao: '', // Novo campo para a data
+    hora_publicacao: '', // Novo campo para a hora
   });
 
   useEffect(() => {
     const fetchPublicacao = async () => {
       try {
-
         const response = await axios.get(`http://3.209.65.64:3002/publicacao/${id}`, {
           headers: {
             Authorization: user?.token
@@ -39,6 +40,7 @@ export default function SecondDetailsScreen({ onPress, title = 'VOLTAR' }: Index
         setPublicacao(response.data);
       } catch (err) {
         console.error(err);
+        setError("Erro ao carregar a publicação.");
       } finally {
         setLoading(false);
       }
@@ -65,18 +67,14 @@ export default function SecondDetailsScreen({ onPress, title = 'VOLTAR' }: Index
 
   return (
     <SafeAreaView style={safe.container}>
-
       <ScrollView
         style={safe.scroll}
         contentContainerStyle={safe.scrollContent}
       >
-
         <View style={styles.wrapper}>
-
           <Text style={titulo.title}>DETALHES DA PUBLICAÇÃO</Text>
 
           <View style={styles.contentBox}>
-
             <Image
               source={{
                 uri: publicacao.imagem_publicacao
@@ -109,16 +107,27 @@ export default function SecondDetailsScreen({ onPress, title = 'VOLTAR' }: Index
               <View style={styles.divider} />
               <Text style={texto.valorCampo}>{publicacao.descricao_publicacao}</Text>
             </View>
+
+            {/* Novo campo para exibir a data da publicação */}
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>Data</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{publicacao.date_publicacao}</Text>
+            </View>
+
+            {/* Novo campo para exibir a hora da publicação */}
+            <View style={styles.campo}>
+              <Text style={texto.tituloCampo}>Hora</Text>
+              <View style={styles.divider} />
+              <Text style={texto.valorCampo}>{publicacao.hora_publicacao}</Text>
+            </View>
           </View>
 
           <Pressable style={botao.button}>
             <Link href="/" style={texto.text}>VOLTAR</Link>
           </Pressable>
-
         </View>
-
       </ScrollView>
-
     </SafeAreaView>
   );
 }

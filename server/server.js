@@ -209,6 +209,9 @@ app.post('/login', async (req, res) => {
 app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
     const data = req.body;
 
+    // Verifique se os campos estão presentes no corpo da requisição
+    console.log("Dados recebidos no backend:", data);
+
     const publicacao = [
         data.imagem_publicacao,
         data.titulo_publicacao,
@@ -216,7 +219,8 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
         data.estado_publicacao,
         data.cidade_publicacao,
         data.id_usuario,
-        data.hora_publicacao,
+        data.date_publicacao, // Novo campo para a data
+        data.hora_publicacao, // Novo campo para a hora
         data.latitude_publicacao,
         data.longitude_publicacao,
     ];
@@ -225,8 +229,8 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
         const query = `
             INSERT INTO publicacao (
                 imagem_publicacao, titulo_publicacao, descricao_publicacao, estado_publicacao, 
-                cidade_publicacao, id_usuario, hora_publicacao, latitude_publicacao, longitude_publicacao
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                cidade_publicacao, id_usuario, date_publicacao, hora_publicacao, latitude_publicacao, longitude_publicacao
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         await resultSQLQuery(query, publicacao);
@@ -418,7 +422,8 @@ app.get('/publicacao/:id_publicacao', middlewareValidarJWT, async (req, res) => 
                 p.estado_publicacao, 
                 p.cidade_publicacao, 
                 p.id_usuario,
-                p.hora_publicacao,
+                p.hora_publicacao, -- Novo campo para a hora
+                p.date_publicacao, -- Novo campo para a data
                 p.latitude_publicacao,
                 p.longitude_publicacao,
                 u.nome_usuario, 
@@ -483,7 +488,8 @@ app.get('/publicacao', middlewareValidarJWT, async (req, res) => {
                 p.estado_publicacao, 
                 p.cidade_publicacao,
                 p.id_usuario,
-                p.hora_publicacao,
+                p.hora_publicacao, -- Novo campo para a hora
+                p.date_publicacao, -- Novo campo para a data
                 p.latitude_publicacao,
                 p.longitude_publicacao,
                 u.nome_usuario, 
