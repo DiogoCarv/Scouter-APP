@@ -5,12 +5,11 @@ import axios from 'axios';
 import { useAuth } from "../../../context/AuthProvider";
 import { Link, router, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
 
 export default function Model() {
   axios.defaults.baseURL = "http://3.209.65.64:3002/";
 
-  const { user, logout } = useAuth();
+  const { user, logout, getLocation } = useAuth();
 
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -25,29 +24,19 @@ export default function Model() {
   // Estados para armazenar a latitude e longitude
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
 
-  // Função para capturar a localização
+  // Obter a localização do AuthProvider
   useEffect(() => {
-    (async () => {
-      // Solicita permissão para acessar a localização
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permissão para acessar a localização foi negada.');
-        return;
+    const fetchLocation = async () => {
+      const location = await getLocation();
+      if (location) {
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
       }
+    };
 
-      try {
-        // Captura a localização atual
-        let location = await Location.getCurrentPositionAsync({});
-        setLatitude(location.coords.latitude);
-        setLongitude(location.coords.longitude);
-      } catch (error) {
-        console.error("Erro ao obter localização:", error);
-        setErrorMsg('Não foi possível obter a localização. Verifique se o GPS está ativado.');
-      }
-    })();
-  }, []);
+    fetchLocation();
+  }, [getLocation]);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
