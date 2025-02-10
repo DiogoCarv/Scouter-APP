@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View, TextInput, Alert, Button, Image, Platform } from 'react-native';
+import { Pressable, StyleSheet, Text, View, TextInput, Alert, Button, Image, Platform, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -207,99 +207,96 @@ export default function Model() {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#00000040',
-      }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
     >
-      <Link href={'/'} asChild>
-        <Pressable style={StyleSheet.absoluteFill} />
-      </Link>
-      <View
-        style={{
-          width: '90%',
-          height: '80%',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'white',
-        }}
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>PUBLICAR</Text>
+        <View style={styles.container}>
+          <Text style={styles.title}>PUBLICAR</Text>
 
-        <Pressable onPress={pickImage}>
-          <Image
-            source={{
-              uri: image || 'https://cokimoveis.com.br/img/sem_foto.png',
-            }}
-            style={styles.image}
-          />
-        </Pressable>
+          <Pressable onPress={pickImage}>
+            <Image
+              source={{
+                uri: image || 'https://cokimoveis.com.br/img/sem_foto.png',
+              }}
+              style={styles.image}
+            />
+          </Pressable>
 
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="TÍTULO"
-            onChangeText={setTitulo}
-            value={titulo}
-            maxLength={100}
-          />
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              placeholder="TÍTULO"
+              onChangeText={setTitulo}
+              value={titulo}
+              maxLength={100}
+            />
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              placeholder="DESCRIÇÃO"
+              onChangeText={setDescricao}
+              value={descricao}
+              maxLength={100}
+            />
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Picker
+              selectedValue={estado}
+              style={{ height: 50, width: '100%', color: '#000' }}
+              onValueChange={handleEstadoChange}
+            >
+              <Picker.Item label="Selecione o Estado" value="" />
+              {Object.keys(estadosECidades).map((uf) => (
+                <Picker.Item key={uf} label={uf} value={uf} />
+              ))}
+            </Picker>
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Picker
+              selectedValue={cidade}
+              style={{ height: 50, width: '100%', color: '#000' }}
+              onValueChange={setCidade}
+              enabled={cidadesDisponiveis.length > 0}
+            >
+              <Picker.Item label="Selecione a Cidade" value="" />
+              {cidadesDisponiveis.map((city) => (
+                <Picker.Item key={city} label={city} value={city} />
+              ))}
+            </Picker>
+          </View>
+
+          <Pressable style={styles.button} onPress={Cadastrar}>
+            <Text style={styles.text}>PUBLICAR</Text>
+          </Pressable>
         </View>
-
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="DESCRIÇÃO"
-            onChangeText={setDescricao}
-            value={descricao}
-            maxLength={100}
-          />
-        </View>
-
-        <View style={styles.inputWrapper}>
-          <Picker
-            selectedValue={estado}
-            style={{ height: 50, width: '100%', color: '#000' }}
-            onValueChange={handleEstadoChange}
-          >
-            <Picker.Item label="Selecione o Estado" value="" />
-            {Object.keys(estadosECidades).map((uf) => (
-              <Picker.Item key={uf} label={uf} value={uf} />
-            ))}
-          </Picker>
-        </View>
-
-        <View style={styles.inputWrapper}>
-          <Picker
-            selectedValue={cidade}
-            style={{ height: 50, width: '100%', color: '#000' }}
-            onValueChange={setCidade}
-            enabled={cidadesDisponiveis.length > 0}
-          >
-            <Picker.Item label="Selecione a Cidade" value="" />
-            {cidadesDisponiveis.map((city) => (
-              <Picker.Item key={city} label={city} value={city} />
-            ))}
-          </Picker>
-        </View>
-
-        <Pressable style={styles.button} onPress={Cadastrar}>
-          <Text style={styles.text}>PUBLICAR</Text>
-        </Pressable>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    padding: 20,
+  },
   title: {
     fontSize: 20,
     color: 'black',
     fontWeight: 'bold',
     letterSpacing: 0.25,
-    marginBottom: 5,
+    marginBottom: 20,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -310,7 +307,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 12,
     height: 50,
-    width: '80%',
+    width: '100%',
     backgroundColor: '#fff',
   },
   input: {
@@ -328,6 +325,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: '#191970',
     marginTop: 10,
+    width: '100%',
   },
   text: {
     fontSize: 16,
