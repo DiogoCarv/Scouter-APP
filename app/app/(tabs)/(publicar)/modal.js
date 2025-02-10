@@ -1,10 +1,11 @@
-import { Pressable, StyleSheet, Text, View, TextInput, Alert, Button, Image } from 'react-native';
+import { Pressable, StyleSheet, Text, View, TextInput, Alert, Button, Image, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from "../../../context/AuthProvider";
 import { Link, router, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 
 export default function Model() {
   axios.defaults.baseURL = "http://3.209.65.64:3002/";
@@ -20,6 +21,33 @@ export default function Model() {
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Estados para armazenar a latitude e longitude
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  // Função para capturar a localização
+  useEffect(() => {
+    (async () => {
+      // Solicita permissão para acessar a localização
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permissão para acessar a localização foi negada.');
+        return;
+      }
+
+      try {
+        // Captura a localização atual
+        let location = await Location.getCurrentPositionAsync({});
+        setLatitude(location.coords.latitude);
+        setLongitude(location.coords.longitude);
+      } catch (error) {
+        console.error("Erro ao obter localização:", error);
+        setErrorMsg('Não foi possível obter a localização. Verifique se o GPS está ativado.');
+      }
+    })();
+  }, []);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -70,7 +98,6 @@ export default function Model() {
         alert("Upload bem-sucedido!");
         console.log("Imgur Response:", data);
         console.log(data.data.link);
-        //setImageUrl(data.data.link); // Retorna o link da imagem
         return data.data.link;
       } else {
         alert(`Erro no upload: ${data.data.error}`);
@@ -95,6 +122,11 @@ export default function Model() {
       return;
     }
 
+    if (!latitude || !longitude) {
+      Alert.alert('Erro', errorMsg || 'Não foi possível obter a localização.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -102,14 +134,9 @@ export default function Model() {
 
       console.log(user.id);
 
-      // Gerar a data e hora atuais separadamente
       const agora = new Date();
-      const datePublicacao = agora.toISOString().split('T')[0]; // Formato YYYY-MM-DD
-      const horaPublicacao = agora.toTimeString().split(' ')[0]; // Formato HH:MM:SS
-
-      // Verifique se a data e a hora estão corretas
-      console.log("Data da publicação:", datePublicacao);
-      console.log("Hora da publicação:", horaPublicacao);
+      const datePublicacao = agora.toISOString().split('T')[0];
+      const horaPublicacao = agora.toTimeString().split(' ')[0];
 
       const publicacao = {
         imagem_publicacao: imageUrl,
@@ -118,18 +145,18 @@ export default function Model() {
         estado_publicacao: estado,
         cidade_publicacao: cidade,
         id_usuario: user.id,
-        date_publicacao: datePublicacao, // Novo campo para a data
-        hora_publicacao: horaPublicacao, // Novo campo para a hora
-        latitude_publicacao: null,
-        longitude_publicacao: null,
+        date_publicacao: datePublicacao,
+        hora_publicacao: horaPublicacao,
+        latitude_publicacao: latitude, // Incluímos a latitude
+        longitude_publicacao: longitude, // Incluímos a longitude
       };
 
-      console.log("Dados da publicação:", publicacao); // Verifique se o objeto está correto
+      console.log("Dados da publicação:", publicacao);
 
       const response = await axios.post('/publicacao', publicacao, {
         headers: {
           'Authorization': `${user.token}`,
-          'Content-Type': 'application/json', // Garantir que o conteúdo seja JSON
+          'Content-Type': 'application/json',
         }
       });
 

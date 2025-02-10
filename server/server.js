@@ -219,8 +219,8 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
         data.estado_publicacao,
         data.cidade_publicacao,
         data.id_usuario,
-        data.date_publicacao, // Novo campo para a data
-        data.hora_publicacao, // Novo campo para a hora
+        data.date_publicacao,
+        data.hora_publicacao,
         data.latitude_publicacao,
         data.longitude_publicacao,
     ];
