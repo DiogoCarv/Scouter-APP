@@ -116,28 +116,28 @@ export default function Model() {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
       return;
     }
-
+  
     if (!file) {
       Alert.alert('Erro', 'Por favor, selecione uma imagem.');
       return;
     }
-
+  
     if (!latitude || !longitude) {
-      Alert.alert('Erro', errorMsg || 'Não foi possível obter a localização.');
+      Alert.alert('Erro', 'Não foi possível obter a localização.');
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       const imageUrl = await onFileUpload();
-
+  
       console.log(user.id);
-
+  
       const agora = new Date();
-      const datePublicacao = agora.toISOString().split('T')[0];
-      const horaPublicacao = agora.toTimeString().split(' ')[0];
-
+      const datePublicacao = agora.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      const horaPublicacao = agora.toTimeString().split(' ')[0]; // Formato HH:MM:SS
+  
       const publicacao = {
         imagem_publicacao: imageUrl,
         titulo_publicacao: titulo,
@@ -145,21 +145,21 @@ export default function Model() {
         estado_publicacao: estado,
         cidade_publicacao: cidade,
         id_usuario: user.id,
-        date_publicacao: datePublicacao,
-        hora_publicacao: horaPublicacao,
-        latitude_publicacao: latitude, // Incluímos a latitude
-        longitude_publicacao: longitude, // Incluímos a longitude
+        date_publicacao: datePublicacao, // Data da publicação
+        hora_publicacao: horaPublicacao, // Hora da publicação
+        latitude_publicacao: latitude, // Latitude
+        longitude_publicacao: longitude, // Longitude
       };
-
-      console.log("Dados da publicação:", publicacao);
-
+  
+      console.log("Dados da publicação:", publicacao); // Verifique se os dados estão corretos
+  
       const response = await axios.post('/publicacao', publicacao, {
         headers: {
           'Authorization': `${user.token}`,
           'Content-Type': 'application/json',
         }
       });
-
+  
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Publicação cadastrada com sucesso!');
         router.push("/(feed)");
