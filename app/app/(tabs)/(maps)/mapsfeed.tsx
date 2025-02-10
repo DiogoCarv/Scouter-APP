@@ -1,6 +1,7 @@
 import React from 'react';
 import MapView from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
+import { useAuth } from "../../../context/AuthProvider";
 
 export default function App() {
   return (
