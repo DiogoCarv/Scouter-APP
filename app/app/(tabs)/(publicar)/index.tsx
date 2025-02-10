@@ -1,9 +1,10 @@
 import { Link } from 'expo-router';
 import { View, Text, StyleSheet, Image, Pressable, Button, Alert, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from "../../../context/AuthProvider";
 import axios from 'axios';
+import * as Location from 'expo-location';
 
 interface IndexProps {
   onPress: () => void;
@@ -11,7 +12,28 @@ interface IndexProps {
 }
 
 export default function Index({ onPress, title = 'PUBLICAR' }: IndexProps) {
-  const { logout } = useAuth();
+  const { logout, setLocation } = useAuth();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          setErrorMsg('Permissão para acessar a localização foi negada.');
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = location.coords;
+
+        await setLocation(latitude, longitude);
+      } catch (error) {
+        console.error("Erro ao obter localização:", error);
+        setErrorMsg('Não foi possível obter a localização. Verifique se o GPS está ativado.');
+      }
+    })();
+  }, []);
 
   return (
     <SafeAreaView style={safe.container}>
