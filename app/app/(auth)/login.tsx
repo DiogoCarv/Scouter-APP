@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, Alert, View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from "../../context/AuthProvider";
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,32 +14,23 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [senhaVisivel, setSenhaVisivel] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
+  const [locationPermission, setLocationPermission] = useState<boolean>(false);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        setLocationPermission(true);
+      } else {
+        Alert.alert("Permissão negada", "Permissão para acessar a localização foi negada.");
+      }
+    })();
+  }, []);
 
   const alternarVisibilidadeSenha = () => {
     setSenhaVisivel(!senhaVisivel);
   };
-
-    useEffect(() => {
-      (async () => {
-        try {
-          let { status } = await Location.requestForegroundPermissionsAsync();
-          if (status !== 'granted') {
-            setErrorMsg('Permissão para acessar a localização foi negada.');
-            return;
-          }
-  
-          let location = await Location.getCurrentPositionAsync({});
-          const { latitude, longitude } = location.coords;
-  
-          await setLocation(latitude, longitude);
-        } catch (error) {
-          console.error("Erro ao obter localização:", error);
-          setErrorMsg('Não foi possível obter a localização. Verifique se o GPS está ativado.');
-        }
-      })();
-    }, []);
 
   const handleLogin = async () => {
     if (!email || !senha) {
@@ -57,6 +48,11 @@ export default function Login() {
         let { token, id_usuario, nome_usuario, latitude, longitude } = response.data;
 
         if (latitude === undefined || longitude === undefined) {
+          if (!locationPermission) {
+            Alert.alert("Erro", "Permissão para acessar a localização é necessária.");
+            return;
+          }
+
           console.log("Localização não definida, obtendo novamente...");
           const location = await Location.getCurrentPositionAsync({});
           latitude = location.coords.latitude;
