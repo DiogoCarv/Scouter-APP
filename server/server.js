@@ -12,6 +12,8 @@ var cors = require('cors');
 app.use(express.static("public"));
 app.use(cors());
 
+app.use(express.urlencoded({ extended: true }));
+
 app.use(express.json());
 app.get('/', (req, res) => res.json({ message: 'Funcionando!' }));
 
@@ -212,6 +214,43 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
     // Verifique se os campos estão presentes no corpo da requisição
     console.log("Dados recebidos no backend:", data);
 
+    // Verificação dos campos obrigatórios
+    const camposObrigatorios = [
+        'imagem_publicacao',
+        'titulo_publicacao',
+        'descricao_publicacao',
+        'estado_publicacao',
+        'cidade_publicacao',
+        'id_usuario',
+        'date_publicacao',
+        'hora_publicacao',
+        'latitude_publicacao',
+        'longitude_publicacao',
+    ];
+
+    for (const campo of camposObrigatorios) {
+        if (data[campo] === undefined || data[campo] === null || data[campo] === '') {
+            return res.status(400).json({ mensagem: `O campo ${campo} é obrigatório e não pode estar vazio.` });
+        }
+    }
+
+    // Verificação adicional para latitude e longitude
+    if (isNaN(data.latitude_publicacao) || isNaN(data.longitude_publicacao)) {
+        return res.status(400).json({ mensagem: "Latitude e longitude devem ser números válidos." });
+    }
+
+    // Verificação do formato da data e hora
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(data.date_publicacao)) {
+        return res.status(400).json({ mensagem: "Formato de data inválido. Use YYYY-MM-DD." });
+    }
+
+    const timeRegex = /^\d{2}:\d{2}:\d{2}$/;
+    if (!timeRegex.test(data.hora_publicacao)) {
+        return res.status(400).json({ mensagem: "Formato de hora inválido. Use HH:MM:SS." });
+    }
+
+    // Preparação dos dados para inserção
     const publicacao = [
         data.imagem_publicacao,
         data.titulo_publicacao,
@@ -219,10 +258,10 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
         data.estado_publicacao,
         data.cidade_publicacao,
         data.id_usuario,
-        data.date_publicacao,
-        data.hora_publicacao,
-        data.latitude_publicacao,
-        data.longitude_publicacao,
+        data.date_publicacao, // Formato YYYY-MM-DD
+        data.hora_publicacao, // Formato HH:MM:SS
+        parseFloat(data.latitude_publicacao), // Garante que é um número
+        parseFloat(data.longitude_publicacao), // Garante que é um número
     ];
 
     try {
@@ -233,14 +272,17 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
+        console.log("Executando query:", query);
+        console.log("Com os valores:", publicacao);
+
         await resultSQLQuery(query, publicacao);
 
         res.status(201).json({ mensagem: "Publicação criada com sucesso!" });
     } catch (error) {
+        console.error("Erro ao executar a query:", error);
         if (error.code === 'ER_NO_REFERENCED_ROW_2') {
             res.status(400).json({ mensagem: "Usuário associado não encontrado!" });
         } else {
-            console.error(error);
             res.status(500).json({ mensagem: "Erro ao criar a publicação." });
         }
     }
