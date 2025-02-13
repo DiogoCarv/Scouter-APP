@@ -19,12 +19,6 @@ app.get('/', (req, res) => res.json({ message: 'Funcionando!' }));
 
 const privateKey = process.env.JWT_SECRET || "defaultSecret";
 
-const compression = require('compression');
-app.use(compression());
-
-const helmet = require('helmet');
-app.use(helmet());
-
 const cloudinary = require('./cloudinary'); // Importa a configuração do Cloudinary
 const path = require('path');
 const fs = require('fs');
