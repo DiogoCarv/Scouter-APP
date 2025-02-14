@@ -1,44 +1,17 @@
-const express = require('express');
-const app = express();
+// server.js
+// Adicione esta linha para forçar o CommonJS
+'use strict';
+
 const port = 3002;
-const mysql = require('mysql2');
-const bcrypt = require('bcrypt');
-var bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ extended: 'false' }));
-app.use(bodyParser.json());
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-var cors = require('cors');
-app.use(express.static("public"));
-app.use(cors());
+const express = require('express');
+const jwt = require('jsonwebtoken');
 
+const app = express();
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.json());
-app.get('/', (req, res) => res.json({ message: 'Funcionando!' }));
-
 const privateKey = process.env.JWT_SECRET || "defaultSecret";
-
-const cloudinary = require('./cloudinary'); // Importa a configuração do Cloudinary
-const path = require('path');
-const fs = require('fs');
-
-const uploadImage = async (imagePath) => {
-    try {
-        const result = await cloudinary.uploader.upload(imagePath, {
-            folder: 'uploads', // Opcional: organiza imagens em uma pasta específica no Cloudinary
-        });
-
-        console.log('Upload bem-sucedido:', result.secure_url);
-        return result.secure_url; // Retorna o link da imagem hospedada
-    } catch (error) {
-        console.error('Erro ao fazer upload da imagem:', error);
-        throw error;
-    }
-};
-
-const jwt = require("jsonwebtoken");
-//const privateKey = "xxxyyyzzz123";
 
 const middlewareValidarJWT = (req, res, next) => {
     const token = req.headers["x-access-token"];
@@ -53,14 +26,6 @@ const middlewareValidarJWT = (req, res, next) => {
         next();
     });
 };
-
-jwt.verify(jwtToken, privateKey, (err, userInfo) => {
-    if (err) {
-        return res.status(403).json({ mensagem: "Token inválido ou expirado." });
-    }
-    req.userInfo = userInfo;
-    next();
-});
 
 const db = {
     host: '3.209.65.64',
@@ -123,9 +88,6 @@ app.post('/usuarios', async (req, res) => {
         return res.status(400).json({ mensagem: "Formato de e-mail inválido!" });
     }
 
-    // Criptografa a senha
-    const senhaHash = await bcrypt.hash(data.senha_usuario, 10);
-
     const usuario = [
         data.imagem_usuario || null,
         data.nome_usuario,
@@ -134,7 +96,7 @@ app.post('/usuarios', async (req, res) => {
         data.cpf_usuario,
         data.estado_usuario,
         data.cidade_usuario,
-        senhaHash
+        data.senha_usuario // Senha em texto plano (não recomendado)
     ];
 
     try {
@@ -177,8 +139,8 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ mensagem: "Credenciais inválidas." });
         }
 
-        const senhaValida = await bcrypt.compare(senha, user.senha_usuario);
-        if (!senhaValida) {
+        // Verifica a senha em texto plano (não recomendado)
+        if (senha !== user.senha_usuario) {
             return res.status(401).json({ mensagem: "Credenciais inválidas." });
         }
 
@@ -282,22 +244,6 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
     }
 });
 
-app.post('/upload', middlewareValidarJWT, async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ mensagem: "Nenhum arquivo enviado." });
-    }
-    try {
-        const filePath = req.file.path; // Defina o caminho correto para o arquivo enviado
-        const imageUrl = await uploadImage(filePath);
-        res.status(200).json({ mensagem: "Upload bem-sucedido.", url: imageUrl });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ mensagem: "Erro ao fazer upload da imagem." });
-    } finally {
-        fs.unlinkSync(req.file.path); // Remove o arquivo local após o upload
-    }
-});
-
 //DELETE
 
 app.delete('/usuarios/:id_usuario', middlewareValidarJWT, async (req, res) => {
@@ -376,10 +322,6 @@ app.put('/usuarios/:id_usuario', middlewareValidarJWT, async (req, res) => {
 
         if (Object.keys(camposAtualizados).length === 0) {
             return res.status(400).json({ mensagem: "Nenhum campo válido fornecido para atualização." });
-        }
-
-        if (camposAtualizados.senha_usuario) {
-            camposAtualizados.senha_usuario = await bcrypt.hash(camposAtualizados.senha_usuario, 10);
         }
 
         const setClause = Object.keys(camposAtualizados).map(campo => `${campo} = ?`).join(', ');
@@ -543,8 +485,6 @@ app.get('/publicacao', middlewareValidarJWT, async (req, res) => {
     }
 });
 
-app.get('/usuarios', middlewareValidarJWT, (req, res) => {
-    const id = [];
-    execSQLQuery('SELECT * FROM usuarios', id, res);
+app.listen(port, () => {
+    console.log(`API funcionando na porta ${port}!`);
 });
-
