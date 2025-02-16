@@ -24,9 +24,17 @@ export default function SecondDetailsScreen({ onPress, title = 'VOLTAR' }: Index
     cidade_publicacao: '',
     nome_usuario: '',
     sobrenome_usuario: '',
-    date_publicacao: '', // Novo campo para a data
-    hora_publicacao: '', // Novo campo para a hora
+    date_publicacao: '',
+    hora_publicacao: '',
   });
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
   useEffect(() => {
     const fetchPublicacao = async () => {
@@ -108,14 +116,12 @@ export default function SecondDetailsScreen({ onPress, title = 'VOLTAR' }: Index
               <Text style={texto.valorCampo}>{publicacao.descricao_publicacao}</Text>
             </View>
 
-            {/* Novo campo para exibir a data da publicação */}
             <View style={styles.campo}>
               <Text style={texto.tituloCampo}>Data</Text>
               <View style={styles.divider} />
-              <Text style={texto.valorCampo}>{publicacao.date_publicacao}</Text>
+              <Text style={texto.valorCampo}>{formatDate(publicacao.date_publicacao)}</Text>
             </View>
 
-            {/* Novo campo para exibir a hora da publicação */}
             <View style={styles.campo}>
               <Text style={texto.tituloCampo}>Hora</Text>
               <View style={styles.divider} />

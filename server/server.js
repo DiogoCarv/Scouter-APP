@@ -17,16 +17,21 @@ const privateKey = process.env.JWT_SECRET || "defaultSecret";
 
 // Middleware para validar JWT
 const middlewareValidarJWT = (req, res, next) => {
-    const token = req.headers["x-access-token"];
+    const token = req.headers["authorization"];
+
     if (!token) {
         console.error("Token não fornecido.");
         return res.status(401).json({ mensagem: "Token não fornecido." });
     }
+
+    console.log("Token recebido:", token);
+    
     jwt.verify(token, privateKey, (err, userInfo) => {
         if (err) {
-            console.error("Token inválido ou expirado:", err);
+            console.error("Erro ao verificar o token:", err);
             return res.status(403).json({ mensagem: "Token inválido ou expirado." });
         }
+        console.log("Token válido para o usuário:", userInfo);
         req.userInfo = userInfo;
         next();
     });
@@ -196,7 +201,7 @@ app.post('/login', async (req, res) => {
 app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
     const data = req.body;
 
-    // Verifique se os campos estão presentes no corpo da requisição
+    // Log dos dados recebidos
     console.log("Dados recebidos no backend:", data);
 
     // Verificação dos campos obrigatórios
@@ -215,24 +220,46 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
 
     for (const campo of camposObrigatorios) {
         if (data[campo] === undefined || data[campo] === null || data[campo] === '') {
-            return res.status(400).json({ mensagem: `O campo ${campo} é obrigatório e não pode estar vazio.` });
+            console.error(`Campo obrigatório faltando ou vazio: ${campo}`);
+            return res.status(400).json({ 
+                mensagem: `O campo ${campo} é obrigatório e não pode estar vazio.`,
+                campo: campo,
+                valorRecebido: data[campo]
+            });
         }
     }
 
     // Verificação adicional para latitude e longitude
     if (isNaN(data.latitude_publicacao) || isNaN(data.longitude_publicacao)) {
-        return res.status(400).json({ mensagem: "Latitude e longitude devem ser números válidos." });
+        console.error("Latitude ou longitude inválida:", {
+            latitude: data.latitude_publicacao,
+            longitude: data.longitude_publicacao
+        });
+        return res.status(400).json({ 
+            mensagem: "Latitude e longitude devem ser números válidos.",
+            latitude: data.latitude_publicacao,
+            longitude: data.longitude_publicacao
+        });
     }
 
-    // Verificação do formato da data e hora
+    // Verificação do formato da data
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(data.date_publicacao)) {
-        return res.status(400).json({ mensagem: "Formato de data inválido. Use YYYY-MM-DD." });
+        console.error("Formato de data inválido:", data.date_publicacao);
+        return res.status(400).json({ 
+            mensagem: "Formato de data inválido. Use YYYY-MM-DD.",
+            dataRecebida: data.date_publicacao
+        });
     }
 
+    // Verificação do formato da hora
     const timeRegex = /^\d{2}:\d{2}:\d{2}$/;
     if (!timeRegex.test(data.hora_publicacao)) {
-        return res.status(400).json({ mensagem: "Formato de hora inválido. Use HH:MM:SS." });
+        console.error("Formato de hora inválido:", data.hora_publicacao);
+        return res.status(400).json({ 
+            mensagem: "Formato de hora inválido. Use HH:MM:SS.",
+            horaRecebida: data.hora_publicacao
+        });
     }
 
     // Preparação dos dados para inserção
@@ -262,13 +289,37 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
 
         await resultSQLQuery(query, publicacao);
 
+        console.log("Publicação criada com sucesso:", publicacao);
         res.status(201).json({ mensagem: "Publicação criada com sucesso!" });
     } catch (error) {
-        console.error("Erro ao executar a query:", error);
+        console.error("Erro ao criar a publicação:", error);
+
+        // Tratamento de erros específicos
         if (error.code === 'ER_NO_REFERENCED_ROW_2') {
-            res.status(400).json({ mensagem: "Usuário associado não encontrado!" });
+            console.error("Usuário associado não encontrado:", data.id_usuario);
+            return res.status(400).json({ 
+                mensagem: "Usuário associado não encontrado!",
+                idUsuario: data.id_usuario
+            });
+        } else if (error.code === 'ER_DUP_ENTRY') {
+            console.error("Publicação duplicada:", publicacao);
+            return res.status(409).json({ 
+                mensagem: "Publicação duplicada. Verifique os dados enviados.",
+                dados: publicacao
+            });
+        } else if (error.code === 'ER_BAD_NULL_ERROR') {
+            console.error("Campo obrigatório faltando no banco de dados:", error.sqlMessage);
+            return res.status(400).json({ 
+                mensagem: "Um campo obrigatório não foi fornecido.",
+                erro: error.sqlMessage
+            });
         } else {
-            res.status(500).json({ mensagem: "Erro ao criar a publicação." });
+            console.error("Erro desconhecido ao criar a publicação:", error);
+            return res.status(500).json({ 
+                mensagem: "Erro ao criar a publicação.",
+                erro: error.message,
+                codigo: error.code
+            });
         }
     }
 });
