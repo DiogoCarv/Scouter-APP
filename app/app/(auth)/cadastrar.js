@@ -26,6 +26,10 @@ export default function Login() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const capitalizeFirstLetter = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -237,7 +241,8 @@ export default function Login() {
                   style={styles.input}
                   onChangeText={(value) => {
                     const filteredValue = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
-                    setNome(filteredValue);
+                    const capitalizedValue = capitalizeFirstLetter(filteredValue);
+                    setNome(capitalizedValue);
                   }}
                   value={nome}
                   placeholder={'NOME'}
@@ -249,7 +254,8 @@ export default function Login() {
                   style={styles.input}
                   onChangeText={(value) => {
                     const filteredValue = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
-                    setSobrenome(filteredValue);
+                    const capitalizedValue = capitalizeFirstLetter(filteredValue);
+                    setSobrenome(capitalizedValue);
                   }}
                   value={sobrenome}
                   placeholder={'SOBRENOME'}

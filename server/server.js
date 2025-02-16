@@ -25,7 +25,7 @@ const middlewareValidarJWT = (req, res, next) => {
     }
 
     console.log("Token recebido:", token);
-    
+
     jwt.verify(token, privateKey, (err, userInfo) => {
         if (err) {
             console.error("Erro ao verificar o token:", err);
@@ -172,7 +172,7 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ mensagem: "Credenciais inválidas." });
         }
 
-        // Verifica a senha em texto plano (não recomendado)
+        // Verifica a senha em texto plano
         if (senha !== user.senha_usuario) {
             console.error("Senha incorreta para o usuário:", email);
             return res.status(401).json({ mensagem: "Credenciais inválidas." });
@@ -270,10 +270,10 @@ app.post('/publicacao', middlewareValidarJWT, async (req, res) => {
         data.estado_publicacao,
         data.cidade_publicacao,
         data.id_usuario,
-        data.date_publicacao, // Formato YYYY-MM-DD
-        data.hora_publicacao, // Formato HH:MM:SS
-        parseFloat(data.latitude_publicacao), // Garante que é um número
-        parseFloat(data.longitude_publicacao), // Garante que é um número
+        data.date_publicacao,
+        data.hora_publicacao,
+        parseFloat(data.latitude_publicacao),
+        parseFloat(data.longitude_publicacao),
     ];
 
     try {

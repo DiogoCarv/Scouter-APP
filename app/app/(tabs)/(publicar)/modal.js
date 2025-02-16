@@ -36,6 +36,10 @@ export default function Model() {
     fetchLocation();
   }, [getLocation]);
 
+  const capitalizeFirstLetter = (str) => {
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -231,7 +235,10 @@ export default function Model() {
             <TextInput
               style={styles.input}
               placeholder="TÍTULO"
-              onChangeText={setTitulo}
+              onChangeText={(value) => {
+                const capitalizedValue = capitalizeFirstLetter(value);
+                setTitulo(capitalizedValue);
+              }}
               value={titulo}
               maxLength={100}
             />
@@ -241,7 +248,10 @@ export default function Model() {
             <TextInput
               style={styles.input}
               placeholder="DESCRIÇÃO"
-              onChangeText={setDescricao}
+              onChangeText={(value) => {
+                const capitalizedValue = capitalizeFirstLetter(value);
+                setDescricao(capitalizedValue);
+              }}
               value={descricao}
               maxLength={100}
             />
