@@ -1,25 +1,30 @@
-// server.js
-// Adicione esta linha para forçar o CommonJS
-'use strict';
-
 const port = 3002;
 
 const express = require('express');
+const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const mysql = require('mysql2');
 
 const app = express();
+
+app.use(cors());
+
+// Configurações do Express
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const privateKey = process.env.JWT_SECRET || "defaultSecret";
 
+// Middleware para validar JWT
 const middlewareValidarJWT = (req, res, next) => {
     const token = req.headers["x-access-token"];
     if (!token) {
+        console.error("Token não fornecido.");
         return res.status(401).json({ mensagem: "Token não fornecido." });
     }
     jwt.verify(token, privateKey, (err, userInfo) => {
         if (err) {
+            console.error("Token inválido ou expirado:", err);
             return res.status(403).json({ mensagem: "Token inválido ou expirado." });
         }
         req.userInfo = userInfo;
@@ -28,63 +33,79 @@ const middlewareValidarJWT = (req, res, next) => {
 };
 
 const db = {
-    host: '3.209.65.64',
+    host: 'localhost',
     port: 3306,
-    user: 'diogo',
-    password: 'diogo',
-    database: 'diogo'
+    user: 'root',
+    password: 'Diogo@3421',
+    database: 'scouter'
 };
 
+const connection = mysql.createConnection(db);
+
+connection.connect((err) => {
+    if (err) {
+        console.error("Erro ao conectar ao banco de dados:", err);
+    } else {
+        console.log("Conexão ao banco de dados bem-sucedida!");
+    }
+    connection.end();
+});
+
+// Função para executar queries SQL
 const execSQLQuery = (sqlQry, id, res) => {
     const connection = mysql.createConnection(db);
 
     connection.query(sqlQry, id, (error, results, fields) => {
-        if (error)
-            res.json(error);
-        else
+        if (error) {
+            console.error("Erro na execução da query:", error);
+            res.status(500).json({ mensagem: "Erro ao executar a query.", erro: error });
+        } else {
             res.json(results);
-
+        }
         connection.end();
-        console.log('executou!');
+        console.log('Query executada com sucesso.');
     });
 };
 
+// Função assíncrona para executar queries SQL
 async function resultSQLQuery(sqlQry, id) {
     const connection = await mysql.createConnection(db);
 
-    let [result] = await connection.promise().query(sqlQry, id);
     try {
+        const [result] = await connection.promise().query(sqlQry, id);
         return result;
     } catch (error) {
-        console.log("error" + error);
+        console.error("Erro na execução da query assíncrona:", error);
         throw error;
+    } finally {
+        connection.end();
     }
 }
-
-app.listen(port, () => {
-    console.log(`API funcionando na porta ${port}!`);
-});
 
 //POST
 
 app.post('/usuarios', async (req, res) => {
     const data = req.body;
+    console.log("Dados recebidos:", data);
 
     // Verifica se todos os campos obrigatórios estão presentes
     if (!data.nome_usuario || !data.sobrenome_usuario || !data.email_usuario ||
         !data.cpf_usuario || !data.estado_usuario || !data.cidade_usuario || !data.senha_usuario) {
+        console.error("Campos obrigatórios faltando:", data);
         return res.status(400).json({ mensagem: "Todos os campos são obrigatórios!" });
     }
 
     // Verifica se o CPF tem exatamente 11 dígitos
     const cpfRegex = /^\d{11}$/;
     if (!cpfRegex.test(data.cpf_usuario)) {
+        console.error("CPF inválido:", data.cpf_usuario);
         return res.status(400).json({ mensagem: "O CPF deve conter exatamente 11 dígitos numéricos!" });
     }
 
     // Verifica o formato do e-mail
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(data.email_usuario)) {
+        console.error("E-mail inválido:", data.email_usuario);
         return res.status(400).json({ mensagem: "Formato de e-mail inválido!" });
     }
 
@@ -96,7 +117,7 @@ app.post('/usuarios', async (req, res) => {
         data.cpf_usuario,
         data.estado_usuario,
         data.cidade_usuario,
-        data.senha_usuario // Senha em texto plano (não recomendado)
+        data.senha_usuario
     ];
 
     try {
@@ -107,15 +128,20 @@ app.post('/usuarios', async (req, res) => {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
+        console.log("Query a ser executada:", query);
+        console.log("Valores a serem inseridos:", usuario);
+
         await resultSQLQuery(query, usuario);
+
+        console.log("Usuário cadastrado com sucesso:", usuario);
 
         res.status(201).json({ mensagem: "Usuário cadastrado com sucesso!" });
     } catch (error) {
+        console.error("Erro ao cadastrar usuário:", error);
         if (error.code === 'ER_DUP_ENTRY') {
             res.status(409).json({ mensagem: "E-mail ou CPF já cadastrados!" });
         } else {
-            console.error(error);
-            res.status(500).json({ mensagem: "Erro ao cadastrar usuário." });
+            res.status(500).json({ mensagem: "Erro ao cadastrar usuário.", erro: error.message });
         }
     }
 });
@@ -126,6 +152,7 @@ app.post('/login', async (req, res) => {
     const senha = data.senha_usuario;
 
     if (!email || !senha) {
+        console.error("E-mail ou senha faltando:", data);
         return res.status(400).json({ mensagem: "E-mail e senha são obrigatórios." });
     }
 
@@ -136,18 +163,20 @@ app.post('/login', async (req, res) => {
         const [user] = await resultSQLQuery(query, id);
 
         if (!user) {
+            console.error("Usuário não encontrado:", email);
             return res.status(401).json({ mensagem: "Credenciais inválidas." });
         }
 
         // Verifica a senha em texto plano (não recomendado)
         if (senha !== user.senha_usuario) {
+            console.error("Senha incorreta para o usuário:", email);
             return res.status(401).json({ mensagem: "Credenciais inválidas." });
         }
 
         jwt.sign({ email: user.email_usuario }, privateKey, (err, token) => {
             if (err) {
-                res.status(500).json({ mensagem: "Erro ao gerar o JWT." });
-                return;
+                console.error("Erro ao gerar o JWT:", err);
+                return res.status(500).json({ mensagem: "Erro ao gerar o JWT." });
             }
 
             res.set("x-access-token", token);
@@ -159,8 +188,8 @@ app.post('/login', async (req, res) => {
             });
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ mensagem: "Erro interno." });
+        console.error("Erro no login:", error);
+        res.status(500).json({ mensagem: "Erro interno.", erro: error.message });
     }
 });
 

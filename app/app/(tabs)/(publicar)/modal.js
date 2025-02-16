@@ -7,7 +7,7 @@ import { Link, router, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function Model() {
-  axios.defaults.baseURL = "http://3.209.65.64:3002/";
+  axios.defaults.baseURL = "http://192.168.1.5:3002/";
 
   const { user, logout, getLocation } = useAuth();
 

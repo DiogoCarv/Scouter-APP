@@ -9,7 +9,7 @@ import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function Login() {
-  axios.defaults.baseURL = "http://3.209.65.64:3002/";
+  axios.defaults.baseURL = "http://192.168.1.5:3002/";
 
   const [senhaVisivel, setSenhaVisivel] = useState(false);
 
@@ -117,6 +117,7 @@ export default function Login() {
 
       console.log(usuario);
       const response = await axios.post('/usuarios', usuario);
+      console.log("Resposta do servidor:", response);
 
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!');
@@ -125,7 +126,7 @@ export default function Login() {
         Alert.alert('Erro', 'Erro ao cadastrar usuário.');
       }
     } catch (error) {
-      console.error(error);
+      console.error("Erro completo:", error);
       if (error.response && error.response.status === 409) {
         Alert.alert('Erro', 'E-mail ou CPF já cadastrados!');
       } else {
