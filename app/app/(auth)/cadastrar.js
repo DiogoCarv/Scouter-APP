@@ -93,36 +93,45 @@ export default function Login() {
   };
 
   const Cadastrar = async () => {
+    // Verifica se todos os campos estão preenchidos
     if (!email || !cpf || !cidade || !estado || !nome || !sobrenome || !senha) {
       Alert.alert('Erro', 'Todos os campos devem ser preenchidos.');
       return;
     }
-
+  
+    // Verifica se o CPF tem 11 dígitos
+    const cpfNumerico = cpf.replace(/\D/g, '');
+    if (cpfNumerico.length !== 11) {
+      Alert.alert('Erro', 'O CPF deve ter exatamente 11 dígitos.');
+      return;
+    }
+  
+    // Verifica se uma imagem foi selecionada
     if (!file) {
       Alert.alert('Erro', 'Por favor, selecione uma imagem.');
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       const imageUrl = await onFileUpload();
-
+  
       const usuario = {
         imagem_usuario: imageUrl,
         nome_usuario: nome,
         sobrenome_usuario: sobrenome,
         email_usuario: email,
-        cpf_usuario: cpf.replace(/\D/g, ''),
+        cpf_usuario: cpfNumerico,
         estado_usuario: estado,
         cidade_usuario: cidade,
         senha_usuario: senha,
       };
-
+  
       console.log(usuario);
       const response = await axios.post('/usuarios', usuario);
       console.log("Resposta do servidor:", response);
-
+  
       if (response.status === 201) {
         Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!');
         router.push("/(auth)/login");
