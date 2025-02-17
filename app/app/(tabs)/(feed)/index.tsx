@@ -95,49 +95,46 @@ export default function Index() {
   const Item = ({ item }: { item: ItemData }) => {
     const defaultImageUri = 'https://cokimoveis.com.br/img/sem_foto.png';
     const imageUri = item.imagem_publicacao || defaultImageUri;
-
+  
+    // Função para truncar o texto
+    const truncateText = (text: string, maxLength: number) => {
+      if (text.length > maxLength) {
+        return text.substring(0, maxLength) + '-';
+      }
+      return text;
+    };
+  
     // Calcular a distância entre o usuário e a postagem
     const userLat = user?.latitude;
     const userLon = user?.longitude;
     const postLat = item.latitude_publicacao;
     const postLon = item.longitude_publicacao;
-
+  
     let distance = null;
     if (userLat && userLon && postLat && postLon) {
       distance = haversineDistance(userLat, userLon, postLat, postLon);
     }
-
+  
     return (
       <TouchableOpacity style={styles.feedItem}>
-
         <Image source={{ uri: imageUri }} style={imagem.notificationImage} />
-
         <View style={styles.textContainer}>
-
           <View style={styles.box}>
-
             <View style={styles.altoBox}>
-
               <Link href={`/details/${item.id_publicacao}`} style={texto.feedTitle}>
                 {item.titulo_publicacao}
               </Link>
-
               <View style={styles.divider} />
-
-              <Text style={texto.feedDescription}>{item.descricao_publicacao}</Text>
-            
+              <Text style={texto.feedDescription}>
+                {truncateText(item.descricao_publicacao, 33)}
+              </Text>
             </View>
-
             <View style={styles.baixoBox}>
-
               {distance !== null && (
                 <Text style={texto.distanceText}>{`Distância: ${distance.toFixed(2)} km`}</Text>
               )}
-
             </View>
-
           </View>
-
         </View>
       </TouchableOpacity>
     );
