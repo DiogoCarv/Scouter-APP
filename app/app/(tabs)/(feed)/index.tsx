@@ -1,6 +1,6 @@
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Pressable } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from "../../../context/AuthProvider";
 import { useRouter } from 'expo-router';
@@ -41,10 +41,34 @@ export default function Index() {
         if (response.data) {
           // Filtrar apenas as publicações de outros usuários
           const otherUserPosts = response.data.filter((item: ItemData) => item.id_usuario !== userId);
-          setData(otherUserPosts);
+
+          // Obter a localização do usuário
+          const userLocation = await getLocation();
+          const userLat = userLocation?.latitude;
+          const userLon = userLocation?.longitude;
+
+          if (userLat && userLon) {
+            // Filtrar publicações dentro de 50 km
+            const postsWithin50Km = otherUserPosts.filter((item: ItemData) => {
+              const postLat = item.latitude_publicacao;
+              const postLon = item.longitude_publicacao;
+              if (postLat && postLon) {
+                const distance = haversineDistance(userLat, userLon, postLat, postLon);
+                return distance <= 50; // 50 km
+              }
+              return false;
+            });
+
+            setData(postsWithin50Km);
+          } else {
+            // Se não houver localização, não mostrar nenhuma publicação
+            setData([]);
+            setErrorMsg('Localização não disponível. Não foi possível filtrar publicações.');
+          }
         }
       } catch (error) {
         console.error('ERROR', error);
+        setErrorMsg('Erro ao carregar publicações.');
       }
     };
 
@@ -70,13 +94,6 @@ export default function Index() {
       }
     })();
   }, []);
-
-  type ItemProps = {
-    item: ItemData;
-    onPress: () => void;
-    backgroundColor: string;
-    textColor: string;
-  };
 
   type ItemData = {
     id_publicacao: string;
@@ -154,23 +171,24 @@ export default function Index() {
         </Pressable>
 
         <View style={safe.quadrado}>
-
-          {data.length > 0 ? (
+          {errorMsg ? (
+            <Text style={texto.noPosts}>{errorMsg}</Text>
+          ) : data.length > 0 ? (
             <FlatList
               data={data}
               renderItem={renderItem}
               keyExtractor={(item) => item.id_publicacao}
             />
           ) : (
-            <Text style={texto.noPosts}>Ainda não tem publicações.</Text>
+            <Text style={texto.noPosts}>Nenhuma publicação encontrada dentro de 50 km.</Text>
           )}
-
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
   );
 }
 
+// Estilos (mantidos iguais)
 const safe = StyleSheet.create({
   container: {
     flex: 1,
