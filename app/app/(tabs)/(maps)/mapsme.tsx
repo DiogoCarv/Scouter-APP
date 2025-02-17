@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MapView, { Marker, Region } from 'react-native-maps';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import { useAuth } from "../../../context/AuthProvider";
 import axios from 'axios';
 
@@ -30,8 +30,8 @@ export default function App() {
         setRegion({
           latitude: location.latitude,
           longitude: location.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
         });
 
         try {
@@ -43,6 +43,7 @@ export default function App() {
 
           // Filtra as publicações do usuário conectado
           const filteredPosts = response.data.filter((item: ItemData) => item.id_usuario === user?.id);
+          console.log('Publicações do usuário:', filteredPosts);
           setUserPosts(filteredPosts);
         } catch (error) {
           console.error('ERROR', error);
@@ -55,24 +56,33 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      {region && (
+      {region ? (
         <MapView
           style={styles.map}
           initialRegion={region}
           showsUserLocation={true}
         >
-          {userPosts.map((post) => (
-            <Marker
-              key={post.id_publicacao}
-              coordinate={{
-                latitude: parseFloat(post.latitude),
-                longitude: parseFloat(post.longitude),
-              }}
-              title={post.titulo_publicacao}
-              description={post.descricao_publicacao}
-            />
-          ))}
+          {userPosts.map((post) => {
+            const latitude = parseFloat(post.latitude);
+            const longitude = parseFloat(post.longitude);
+
+            if (isNaN(latitude) || isNaN(longitude)) {
+              console.warn(`Coordenadas inválidas para a publicação ${post.id_publicacao}:`, post.latitude, post.longitude);
+              return null;
+            }
+
+            return (
+              <Marker
+                key={post.id_publicacao}
+                coordinate={{ latitude, longitude }}
+                title={post.titulo_publicacao}
+                description={post.descricao_publicacao}
+              />
+            );
+          })}
         </MapView>
+      ) : (
+        <Text>Carregando mapa...</Text>
       )}
     </View>
   );
@@ -83,7 +93,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
   },
 });
