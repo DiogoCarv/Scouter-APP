@@ -37,7 +37,7 @@ export default function Model() {
   }, [getLocation]);
 
   const capitalizeFirstLetter = (str) => {
-    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
 
   const pickImage = async () => {
