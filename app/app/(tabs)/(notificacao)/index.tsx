@@ -7,6 +7,19 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import * as Location from 'expo-location';
 
+// Função para calcular a distância entre duas coordenadas usando a fórmula de Haversine
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const toRadians = (degrees: number) => degrees * (Math.PI / 180);
+  const R = 6371; // Raio da Terra em km
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export default function Index() {
   const router = useRouter();
   const { user, logout, setLocation, getLocation } = useAuth();
@@ -72,21 +85,58 @@ export default function Index() {
     id_usuario: string;
     nome_usuario: string;
     sobrenome_usuario: string;
+    latitude_publicacao: number;
+    longitude_publicacao: number;
   };
 
   const Item = ({ item }: { item: ItemData }) => {
     const defaultImageUri = 'https://cokimoveis.com.br/img/sem_foto.png';
     const imageUri = item.imagem_publicacao || defaultImageUri;
-  
+
+    // Calcular a distância entre o usuário e a postagem
+    const userLat = user?.latitude;
+    const userLon = user?.longitude;
+    const postLat = item.latitude_publicacao;
+    const postLon = item.longitude_publicacao;
+
+    let distance = null;
+    if (userLat && userLon && postLat && postLon) {
+      distance = haversineDistance(userLat, userLon, postLat, postLon);
+    }
+
     return (
       <TouchableOpacity style={styles.feedItem}>
+
         <Image source={{ uri: imageUri }} style={imagem.notificationImage} />
+
         <View style={styles.textContainer}>
-          <Link href={`/details/${item.id_publicacao}`} style={texto.feedTitle}>
-            {item.titulo_publicacao}
-          </Link>
-          <Text style={texto.feedDescription}>{item.descricao_publicacao}</Text>
+
+          <View style={styles.box}>
+
+            <View style={styles.altoBox}>
+
+              <Link href={`/details/${item.id_publicacao}`} style={texto.feedTitle}>
+                {item.titulo_publicacao}
+              </Link>
+
+              <View style={styles.divider} />
+
+              <Text style={texto.feedDescription}>{item.descricao_publicacao}</Text>
+            
+            </View>
+
+            <View style={styles.baixoBox}>
+
+              {distance !== null && (
+                <Text style={texto.distanceText}>{`Distância: ${distance.toFixed(2)} km`}</Text>
+              )}
+
+            </View>
+
+          </View>
+
         </View>
+
       </TouchableOpacity>
     );
   };
@@ -155,15 +205,19 @@ const texto = StyleSheet.create({
     flexWrap: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-  },  
+    textAlign: 'center',
+  },
   noPosts: {
     fontSize: 16,
     color: '#696969',
     textAlign: 'center',
     marginTop: 20,
-    flexWrap: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+  },
+  distanceText: {
+    fontSize: 14,
+    color: '#F5F5F5',
+    marginTop: 5,
+    textAlign: 'center',
   },
 });
 
@@ -189,14 +243,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     backgroundColor: '#000080',
     borderRadius: 8,
-    height: 120,
+    height: 150,
     overflow: 'hidden',
     width: '95%',
   },
   textContainer: {
     marginLeft: 10,
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
   text: {
     fontSize: 16,
@@ -205,12 +259,36 @@ const styles = StyleSheet.create({
     letterSpacing: 0.25,
     color: 'white',
   },
+  divider: {
+    height: 1,
+    backgroundColor: 'white',
+    marginVertical: 8,
+  },
+  altoBox: {
+    backgroundColor: '#2F4F4F',
+    borderRadius: 8,
+    padding: 10,
+    flex: 1,
+  },
+  baixoBox: {
+    backgroundColor: '#2F4F4F',
+    borderRadius: 8,
+    padding: 10,
+    flexShrink: 1,
+    marginTop: 10,
+  },
+  box: {
+    flex: 1,
+    borderRadius: 8,
+    resizeMode: 'cover',
+    overflow: 'hidden',
+  },
 });
 
 const imagem = StyleSheet.create({
   notificationImage: {
     width: 100,
-    height: 100,
+    height: 130,
     borderRadius: 8,
     resizeMode: 'cover',
     overflow: 'hidden',
