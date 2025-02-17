@@ -21,7 +21,7 @@ type ItemData = {
 export default function App() {
   const { user, getLocation } = useAuth();
   const [region, setRegion] = useState<Region | null>(null);
-  const [userPosts, setUserPosts] = useState<ItemData[]>([]); // Especifique o tipo como ItemData[]
+  const [userPosts, setUserPosts] = useState<ItemData[]>([]);
 
   useEffect(() => {
     const fetchLocationAndPosts = async () => {
@@ -61,6 +61,17 @@ export default function App() {
           initialRegion={region}
           showsUserLocation={true}
         >
+          {userPosts.map((post) => (
+            <Marker
+              key={post.id_publicacao}
+              coordinate={{
+                latitude: parseFloat(post.latitude),
+                longitude: parseFloat(post.longitude),
+              }}
+              title={post.titulo_publicacao}
+              description={post.descricao_publicacao}
+            />
+          ))}
         </MapView>
       )}
     </View>

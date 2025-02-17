@@ -61,6 +61,17 @@ export default function App() {
           initialRegion={region}
           showsUserLocation={true}
         >
+          {otherUsersPosts.map((post) => (
+            <Marker
+              key={post.id_publicacao}
+              coordinate={{
+                latitude: parseFloat(post.latitude),
+                longitude: parseFloat(post.longitude),
+              }}
+              title={post.titulo_publicacao}
+              description={post.descricao_publicacao}
+            />
+          ))}
         </MapView>
       )}
     </View>
