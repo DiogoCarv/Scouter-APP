@@ -23,7 +23,7 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 export default function Index() {
   const router = useRouter();
   const { user, logout, setLocation, getLocation } = useAuth();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<ItemData[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const userId = user?.id;
@@ -48,18 +48,28 @@ export default function Index() {
           const userLon = userLocation?.longitude;
 
           if (userLat && userLon) {
-            // Filtrar publicações dentro de 50 km
-            const postsWithin50Km = otherUserPosts.filter((item: ItemData) => {
+            // Filtrar publicações dentro de 50 km e calcular a distância
+            const postsWithDistance = otherUserPosts.map((item: ItemData) => {
               const postLat = item.latitude_publicacao;
               const postLon = item.longitude_publicacao;
-              if (postLat && postLon) {
-                const distance = haversineDistance(userLat, userLon, postLat, postLon);
-                return distance <= 50; // 50 km
-              }
-              return false;
+              const distance = postLat && postLon ? haversineDistance(userLat, userLon, postLat, postLon) : Infinity;
+              return { ...item, distance }; // distance sempre terá um valor
+            }).filter((item: ItemData) => item.distance <= 50); // Filtrar publicações dentro de 50 km
+
+            // Ordenar publicações por data e hora mais recentes, e depois por distância mais próxima
+            const sortedPosts = postsWithDistance.sort((a: ItemData, b: ItemData) => {
+              const dateA = new Date(`${a.date_publicacao}T${a.hora_publicacao}`);
+              const dateB = new Date(`${b.date_publicacao}T${b.hora_publicacao}`);
+
+              // Ordenar por data e hora mais recentes
+              if (dateA > dateB) return -1;
+              if (dateA < dateB) return 1;
+
+              // Se as datas forem iguais, ordenar por distância mais próxima
+              return a.distance - b.distance; // Agora distance nunca é undefined
             });
 
-            setData(postsWithin50Km);
+            setData(sortedPosts);
           } else {
             // Se não houver localização, não mostrar nenhuma publicação
             setData([]);
@@ -107,6 +117,9 @@ export default function Index() {
     sobrenome_usuario: string;
     latitude_publicacao: number;
     longitude_publicacao: number;
+    date_publicacao: string;
+    hora_publicacao: string;
+    distance: number; // Agora distance é obrigatório
   };
 
   const Item = ({ item }: { item: ItemData }) => {
@@ -120,17 +133,6 @@ export default function Index() {
       }
       return text;
     };
-  
-    // Calcular a distância entre o usuário e a postagem
-    const userLat = user?.latitude;
-    const userLon = user?.longitude;
-    const postLat = item.latitude_publicacao;
-    const postLon = item.longitude_publicacao;
-  
-    let distance = null;
-    if (userLat && userLon && postLat && postLon) {
-      distance = haversineDistance(userLat, userLon, postLat, postLon);
-    }
   
     return (
       <TouchableOpacity style={styles.feedItem}>
@@ -147,9 +149,8 @@ export default function Index() {
               </Text>
             </View>
             <View style={styles.baixoBox}>
-              {distance !== null && (
-                <Text style={texto.distanceText}>{`Distância: ${distance.toFixed(2)} km`}</Text>
-              )}
+              {/* Agora distance sempre tem um valor, não precisamos verificar undefined */}
+              <Text style={texto.distanceText}>{`Distância: ${item.distance.toFixed(2)} km`}</Text>
             </View>
           </View>
         </View>

@@ -1,6 +1,6 @@
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList, Pressable } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from "../../../context/AuthProvider";
 import { useRouter } from 'expo-router';
@@ -23,7 +23,7 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 export default function Index() {
   const router = useRouter();
   const { user, logout, setLocation, getLocation } = useAuth();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<ItemData[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const userId = user?.id;
@@ -37,11 +37,20 @@ export default function Index() {
           },
         });
 
+        // Filtrar apenas as publicações do usuário atual
         const userPosts = response.data.filter((item: ItemData) => item.id_usuario === userId);
 
-        setData(userPosts);
+        // Ordenar as publicações por data e hora mais recentes
+        const sortedPosts = userPosts.sort((a: ItemData, b: ItemData) => {
+          const dateA = new Date(`${a.date_publicacao}T${a.hora_publicacao}`);
+          const dateB = new Date(`${b.date_publicacao}T${b.hora_publicacao}`);
+          return dateB.getTime() - dateA.getTime(); // Ordenar do mais recente para o mais antigo
+        });
+
+        setData(sortedPosts);
       } catch (error) {
         console.error('ERROR', error);
+        setErrorMsg('Erro ao carregar publicações.');
       }
     };
 
@@ -68,13 +77,6 @@ export default function Index() {
     })();
   }, []);
 
-  type ItemProps = {
-    item: ItemData;
-    onPress: () => void;
-    backgroundColor: string;
-    textColor: string;
-  };
-
   type ItemData = {
     id_publicacao: string;
     titulo_publicacao: string;
@@ -87,6 +89,8 @@ export default function Index() {
     sobrenome_usuario: string;
     latitude_publicacao: number;
     longitude_publicacao: number;
+    date_publicacao: string; // Adicionado
+    hora_publicacao: string; // Adicionado
   };
 
   const Item = ({ item }: { item: ItemData }) => {
@@ -137,8 +141,6 @@ export default function Index() {
     );
   };
 
-  const [selectedId, setSelectedId] = useState<string>();
-
   const renderItem = ({ item }: { item: ItemData }) => {
     return <Item item={item} />;
   };
@@ -153,24 +155,24 @@ export default function Index() {
         </Pressable>
 
         <View style={safe.quadrado}>
-
-          {data.length > 0 ? (
+          {errorMsg ? (
+            <Text style={texto.noPosts}>{errorMsg}</Text>
+          ) : data.length > 0 ? (
             <FlatList
               data={data}
               renderItem={renderItem}
               keyExtractor={(item) => item.id_publicacao}
-              extraData={selectedId}
             />
           ) : (
             <Text style={texto.noPosts}>Você ainda não tem publicações.</Text>
           )}
-
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
   );
 }
 
+// Estilos (mantidos iguais)
 const safe = StyleSheet.create({
   container: {
     flex: 1,
@@ -224,9 +226,6 @@ const titulo = StyleSheet.create({
     marginBottom: 20,
     color: '#1C1C1C',
     marginTop: 20,
-    flexWrap: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
   },
 });
 
