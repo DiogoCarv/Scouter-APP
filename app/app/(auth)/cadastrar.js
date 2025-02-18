@@ -9,7 +9,7 @@ import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function Login() {
-  axios.defaults.baseURL = "http://192.168.1.5:3002/";
+  axios.defaults.baseURL = "http://3.209.65.64:3002/";
 
   const [senhaVisivel, setSenhaVisivel] = useState(false);
 

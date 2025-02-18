@@ -37,7 +37,7 @@ export default function UserSettings() {
           return;
         }
 
-        const response = await axios.get(`http://192.168.1.5:3002/usuarios/${user.id}`, {
+        const response = await axios.get(`http://3.209.65.64:3002/usuarios/${user.id}`, {
           headers: {
             Authorization: user.token
           }

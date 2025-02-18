@@ -38,11 +38,11 @@ const middlewareValidarJWT = (req, res, next) => {
 };
 
 const db = {
-    host: 'localhost',
+    host: '3.209.65.64',
     port: 3306,
-    user: 'root',
-    password: 'Diogo@3421',
-    database: 'scouter'
+    user: 'diogo',
+    password: 'diogo',
+    database: 'diogo'
 };
 
 const connection = mysql.createConnection(db);

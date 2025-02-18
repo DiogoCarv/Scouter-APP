@@ -9,7 +9,7 @@ import * as Location from 'expo-location';
 
 export default function Login() {
   const router = useRouter();
-  axios.defaults.baseURL = "http://192.168.1.5:3002/";
+  axios.defaults.baseURL = "http://3.209.65.64:3002/";
   const { setUser, setLocation, getLocation } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');

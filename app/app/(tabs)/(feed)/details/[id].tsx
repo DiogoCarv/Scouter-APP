@@ -38,7 +38,7 @@ export default function DetailsScreen() {
   useEffect(() => {
     const fetchPublicacao = async () => {
       try {
-        const response = await axios.get(`http://192.168.1.5:3002/publicacao/${id}`, {
+        const response = await axios.get(`http://3.209.65.64:3002/publicacao/${id}`, {
           headers: {
             Authorization: user?.token
           }
